@@ -25,7 +25,7 @@ projects_definition <- list("er" = list("regulon" = "Jagannathan&Robinson-Rechav
 #}
 
 
-data(experiment_definitions, package="NEMpipeline")
+data(ER_experiment_definitions, package="NEMpipeline")
 
 # aligners: hisat2, bowtie
 aligners <- c("hisat2") 
@@ -40,6 +40,7 @@ diffexp_methods <- c("DESeq")
 ################################################################################
 
 
-step_010_lfc(project, aligners, experiment_definitions, base_input_dir, lfc_dir)
+#step_010_lfc(project, aligners, experiment_definitions, base_input_dir, lfc_dir)
+step_030_diffexp()
 
 
