@@ -1,4 +1,4 @@
-Package: EstrogenReceptorNEMs
+Package: NEMpipeline
 Type: Package
 Title: Pipeline to run various NEM and non-NEM methods on simulated and 2 experimental datasets
 Version: 0.0.0.9000
