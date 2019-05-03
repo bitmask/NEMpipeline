@@ -32,7 +32,7 @@ step_010_lfc <- function(project, aligners, sampleTable, base_input_dir, lfc_dir
             # counting reads
             fc <- Rsubread::featureCounts(filenames,annot.inbuilt="hg38",isPairedEnd=TRUE)
 
-            return fc
+            return(fc)
         }
         else {
             print("using cached file. To run these steps, Download BAM files from ... and put in ...")
