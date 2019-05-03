@@ -3,7 +3,6 @@
 # pipeline
 # go from aligned bam files to log fold change counts
 
-source("config.R")
 
 #' Compute log fold change from bam files
 #'
