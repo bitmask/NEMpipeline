@@ -24,7 +24,11 @@ projects_definition <- list("er" = list("regulon" = "Jagannathan&Robinson-Rechav
     #sampleTable <- experiment_definitions
 #}
 
-data(experiment_definitions)
+
+#' experiment_definitions
+#' @format A data frame with variables:
+#' Pool,Barcode,Sequence,Sample name,Bam File,Gene,shRNA,Biological Rep
+"experiment_definitions"
 
 # aligners: hisat2, bowtie
 aligners <- c("hisat2") 
