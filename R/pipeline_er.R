@@ -24,6 +24,7 @@ projects_definition <- list("er" = list("regulon" = "Jagannathan&Robinson-Rechav
     #sampleTable <- experiment_definitions
 #}
 
+data(experiment_definitions)
 
 # aligners: hisat2, bowtie
 aligners <- c("hisat2") 
