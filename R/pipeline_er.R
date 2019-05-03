@@ -18,11 +18,12 @@ projects_definition <- list("er" = list("regulon" = "Jagannathan&Robinson-Rechav
                                         "experiment" = "experiment_definitions.csv"))
 
 # read in the sample.table excel sheet specifying the experiment details
-csv.file <- file.path(base_input_dir, project, projects_definition[[project]]$experiment)
-if (file.exists(csv.file)) {
-    experiment_definitions <- read.csv(csv.file)
-    sampleTable <- experiment_definitions
-}
+#csv.file <- file.path(base_input_dir, project, projects_definition[[project]]$experiment)
+#if (file.exists(csv.file)) {
+    #experiment_definitions <- read.csv(csv.file)
+    #sampleTable <- experiment_definitions
+#}
+
 
 # aligners: hisat2, bowtie
 aligners <- c("hisat2") 
@@ -37,6 +38,6 @@ diffexp_methods <- c("DESeq")
 ################################################################################
 
 
-step_010_lfc(project, aligners, sampleTable, base_input_dir, lfc_dir)
+step_010_lfc(project, aligners, experiment_definitions, base_input_dir, lfc_dir)
 
 
