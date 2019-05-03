@@ -25,6 +25,7 @@ projects_definition <- list("er" = list("regulon" = "Jagannathan&Robinson-Rechav
 #}
 
 
+data(experiment_definitions, package="NEMpipeline")
 
 # aligners: hisat2, bowtie
 aligners <- c("hisat2") 
