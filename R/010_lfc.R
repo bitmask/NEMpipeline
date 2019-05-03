@@ -5,7 +5,17 @@
 
 source("config.R")
 
-step_010_lfc <- function() {
+#' Compute lfc from bam files
+#'
+#' @param project
+#' @param aligners
+#' @param sampleTable
+#' @param base_input_dir
+#' @param lfc_dir
+#' @return Number representing the distance between x and y
+#' @export
+
+step_010_lfc <- function(project, aligners, sampleTable, base_input_dir, lfc_dir) {
     for (aligner in aligners) {
         # set up the input/output locations
         align_dir <- file.path(base_input_dir, project, "aligned", aligner)
