@@ -18,22 +18,22 @@ step_010_lfc <- function(project, aligners, sampleTable, base_input_dir, lfc_dir
     for (aligner in aligners) {
         print(aligner)
         # set up the input/output locations
-#        align_dir <- file.path(base_input_dir, project, "aligned", aligner)
-#
-#        # loading bam.files
-#        filenames <- as.character(sampleTable$Bam.File)
-#        filenames <- paste(align_dir, filenames, sep="/")
-#        print(filenames)
-#        file.exists(filenames)
-#        bamfiles <- Rsamtools::BamFileList(filenames)
-#        seqinfo(bamfiles[1])
-#              
-#        # set to single core
-#        #register(SerialParam())
-#              
-#        # counting reads
-#        fc <- Rsubread::featureCounts(filenames,annot.inbuilt="hg38",isPairedEnd=TRUE)
-#
-#        saveRDS(fc, file.path(lfc_dir, paste(aligner, project, "Rds", sep=".")))
+        align_dir <- file.path(base_input_dir, project, "aligned", aligner)
+
+        # loading bam.files
+        filenames <- as.character(sampleTable$Bam.File)
+        filenames <- paste(align_dir, filenames, sep="/")
+        print(filenames)
+        file.exists(filenames)
+        bamfiles <- Rsamtools::BamFileList(filenames)
+        seqinfo(bamfiles[1])
+              
+        # set to single core
+        #register(SerialParam())
+              
+        # counting reads
+        fc <- Rsubread::featureCounts(filenames,annot.inbuilt="hg38",isPairedEnd=TRUE)
+
+        saveRDS(fc, file.path(lfc_dir, paste(aligner, project, "Rds", sep=".")))
     }
 }
