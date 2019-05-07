@@ -23,13 +23,13 @@ preprocess <- function(fc, experiment_definitions, expr.cutoff) {
     stopifnot(all.equal(as.integer(rownames(x$counts)),x$genes$GeneID))
     rownames(x$counts) <- x$genes$GeneID
     #print("Look Up gene names in UCSC hg38 annotation")
-    require(org.Hs.eg.db)
+    require(org.Hs.eg.db)  # sorry for this hack
     rownames(x$counts) <- annotate::lookUp(rownames(x$counts), 'org.Hs.eg', 'SYMBOL')       
     
     # rename colnames(x$counts)
-    samples_foo <- paste(experiment_definitions$Gene,experiment_definitions$shRNA,experiment_definitions$Biological.Rep)
-    # don't overwrite samples from config.R
-    colnames(x$counts) <- samples_foo
+    samples_all <- paste(experiment_definitions$Gene,experiment_definitions$shRNA,experiment_definitions$Biological.Rep)
+    # don't overwrite samples from config
+    colnames(x$counts) <- samples_all
   
     # print dimensions of the raw counts matrix
     #print("Dimensions of the raw counts matrix:")
