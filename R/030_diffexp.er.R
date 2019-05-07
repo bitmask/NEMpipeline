@@ -23,7 +23,7 @@ preprocess <- function(fc, experiment_definitions, expr.cutoff) {
     stopifnot(all.equal(as.integer(rownames(x$counts)),x$genes$GeneID))
     rownames(x$counts) <- x$genes$GeneID
     #print("Look Up gene names in UCSC hg38 annotation")
-    require(org.Hs.eg.db)  # sorry for this hack
+    require(org.Hs.eg.db, quietly = TRUE)  # sorry for this hack
     rownames(x$counts) <- annotate::lookUp(rownames(x$counts), 'org.Hs.eg', 'SYMBOL')       
     
     # rename colnames(x$counts)
@@ -65,7 +65,7 @@ normalize_counts <- function(pos.norm) {
       #return(pos.norm$counts)
 }
 
-process_with_edger <- function(sel, controls) {
+process_with_edger <- function(sel, controls, selected.genes) {
     # based on: https://www.bioconductor.org/help/workflows/RnaSeqGeneEdgeRQL/
     data <- sel
       
@@ -144,7 +144,7 @@ reformat <- function(sel, controls) {
     return(list(counts, condition))
 }
 
-process_with_deseq <- function(counts, condition) {
+process_with_deseq <- function(counts, condition, selected.genes) {
     coldata <- data.frame(row.names=colnames(counts), condition)
         
     # actual DESeq2 analysis
@@ -183,7 +183,7 @@ process_with_deseq <- function(counts, condition) {
     return(shrink.list)
 }
 
-sgene_heatmap <- function(diffexp, diffexp_method, input_file_name) {
+sgene_heatmap <- function(diffexp, diffexp_method, input_file_name, selected.genes) {
     stat <- "log2FoldChange"
     d <- data.frame()
     for (sg in selected.genes) {
@@ -200,11 +200,11 @@ sgene_heatmap <- function(diffexp, diffexp_method, input_file_name) {
 
 # main
 
-step_030_diffexp <- function(project, aligner, diffexp_method, lfc_dir, diffexp_dir, experiment_definitions, expr.cutoff) {
+step_030_diffexp <- function(project, aligner, diffexp_method, lfc_dir, diffexp_dir, experiment_definitions, expr.cutoff, samples, selected.genes) {
     print("030_diffexp")
     input_file_name <- paste(aligner, project, "Rds", sep=".")
     fc <- readRDS(file.path(lfc_dir, input_file_name))
-    foo <- preprocess(fc, experiment_definitions, expr.cutoff)
+    foo <- preprocess(fc, experiment_definitions, expr.cutoff, samples)
     sel <- foo[[1]]
     controls <- foo[[2]]
     #nsel <- normalize_counts(sel)
@@ -214,14 +214,14 @@ step_030_diffexp <- function(project, aligner, diffexp_method, lfc_dir, diffexp_
     counts <- l[[1]]
     condition <- l[[2]]
     if (diffexp_method == "DESeq") {
-        diffexp <- process_with_deseq(counts, condition)
+        diffexp <- process_with_deseq(counts, condition, selected.genes)
     } else if (diffexp_method == "edgeR") {
-        diffexp <- process_with_edger(sel, controls)
+        diffexp <- process_with_edger(sel, controls, selected.genes)
     }
     output_file_name <- paste(diffexp_method, input_file_name, sep=".")
     saveRDS(diffexp, file.path(diffexp_dir, output_file_name))
     # generate sanity check heatmap
-    sgene_heatmap(diffexp, diffexp_method, input_file_name)
+    sgene_heatmap(diffexp, diffexp_method, input_file_name, selected.genes)
 
     # save control data for bnem -- abs values, not lfc
     ctrl <- as.data.frame(rowMeans(sel[!grepl("^NA[0-9]*$",rownames(sel$counts)),controls]$counts))
