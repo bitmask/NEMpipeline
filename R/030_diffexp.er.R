@@ -199,37 +199,33 @@ sgene_heatmap <- function(diffexp, diffexp_method, input_file_name) {
 
 # main
 
-step_030_diffexp <- function() {
-#    for (aligner in aligners) {
-#        input_file_name <- paste(aligner, project, "Rds", sep=".")
-#        fc <- readRDS(file.path(lfc_dir, input_file_name))
-#        foo <- preprocess(fc)
-#        sel <- foo[[1]]
-#        controls <- foo[[2]]
-#        #nsel <- normalize_counts(sel)
-#        nsel <- sel
-#        for (diffexp_method in diffexp_methods) {
-#            l <- reformat(nsel, controls)
-#            counts <- l[[1]]
-#            condition <- l[[2]]
-#            if (diffexp_method == "DESeq") {
-#                diffexp <- process_with_deseq(counts, condition)
-#            } else if (diffexp_method == "edgeR") {
-#                diffexp <- process_with_edger(sel, controls)
-#            }
-#            output_file_name <- paste(diffexp_method, input_file_name, sep=".")
-#            saveRDS(diffexp, file.path(diffexp_dir, output_file_name))
-#            # generate sanity check heatmap
-#            sgene_heatmap(diffexp, diffexp_method, input_file_name)
-#
-#            # save control data for bnem -- abs values, not lfc
-#            ctrl <- as.data.frame(rowMeans(sel[!grepl("^NA[0-9]*$",rownames(sel$counts)),controls]$counts))
-#            rownames(ctrl) <- rownames(sel[!grepl("^NA[0-9]*$",rownames(sel$counts)),]$counts)
-#            colnames(ctrl) <- c("ctrl")
-#            output_file_name <- paste("controls", input_file_name, sep=".")
-#            saveRDS(ctrl, file.path(diffexp_dir, output_file_name))
-#        }
-#    }
-#
+step_030_diffexp <- function(project, aligner, diffexp_method, lfc_dir, diffexp_dir) {
+    input_file_name <- paste(aligner, project, "Rds", sep=".")
+    fc <- readRDS(file.path(lfc_dir, input_file_name))
+    foo <- preprocess(fc)
+    sel <- foo[[1]]
+    controls <- foo[[2]]
+    #nsel <- normalize_counts(sel)
+    nsel <- sel
+
+    l <- reformat(nsel, controls)
+    counts <- l[[1]]
+    condition <- l[[2]]
+    if (diffexp_method == "DESeq") {
+        diffexp <- process_with_deseq(counts, condition)
+    } else if (diffexp_method == "edgeR") {
+        diffexp <- process_with_edger(sel, controls)
+    }
+    output_file_name <- paste(diffexp_method, input_file_name, sep=".")
+    saveRDS(diffexp, file.path(diffexp_dir, output_file_name))
+    # generate sanity check heatmap
+    sgene_heatmap(diffexp, diffexp_method, input_file_name)
+
+    # save control data for bnem -- abs values, not lfc
+    ctrl <- as.data.frame(rowMeans(sel[!grepl("^NA[0-9]*$",rownames(sel$counts)),controls]$counts))
+    rownames(ctrl) <- rownames(sel[!grepl("^NA[0-9]*$",rownames(sel$counts)),]$counts)
+    colnames(ctrl) <- c("ctrl")
+    output_file_name <- paste("controls", input_file_name, sep=".")
+    saveRDS(ctrl, file.path(diffexp_dir, output_file_name))
 }
 

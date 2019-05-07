@@ -9,35 +9,33 @@
 #' Output of this function is also stored in data/hisat2.er.rda
 #'
 #' @param project
-#' @param aligners
+#' @param aligner
 #' @param sampleTable
 #' @param base_input_dir
-#' @param lfc_dir
 #' @return nothing. writes output to file
 #' @export
+step_010_lfc <- function(project, aligner, sampleTable, base_input_dir, lfc_dir) {
+    # set up the input/output locations
+    align_dir <- file.path(base_input_dir, project, "aligned", aligner)
 
-step_010_lfc <- function(project, aligners, sampleTable, base_input_dir, lfc_dir) {
-    for (aligner in aligners) {
-        # set up the input/output locations
-        align_dir <- file.path(base_input_dir, project, "aligned", aligner)
+    # loading bam.files
+    filenames <- as.character(sampleTable$Bam.File)
+    filenames <- paste(align_dir, filenames, sep="/")
+    print(filenames)
+    if (file.exists(filenames)) {
+        bamfiles <- Rsamtools::BamFileList(filenames)
+        seqinfo(bamfiles[1])
+              
+        # counting reads
+        ER_lfc <- Rsubread::featureCounts(filenames,annot.inbuilt="hg38",isPairedEnd=TRUE)
 
-        # loading bam.files
-        filenames <- as.character(sampleTable$Bam.File)
-        filenames <- paste(align_dir, filenames, sep="/")
-        print(filenames)
-        if (file.exists(filenames)) {
-            bamfiles <- Rsamtools::BamFileList(filenames)
-            seqinfo(bamfiles[1])
-                  
-            # counting reads
-            fc <- Rsubread::featureCounts(filenames,annot.inbuilt="hg38",isPairedEnd=TRUE)
-
-            return(fc)
-        }
-        else {
-            print("using cached file. To run these steps, Download BAM files from ... and put in ...")
-            data(fc, package="NEMpipeline")
-        }
-        saveRDS(fc, file.path(lfc_dir, paste(aligner, project, "Rds", sep=".")))
+        # store data if we have regenerated it
+        #usethis::use_data(ER_lfc) # store in package
+        saveRDS(ER_lfc, file.path(lfc_dir, paste(aligner, project, "Rds", sep=".")))
+    }
+    else {
+        print("using cached file. To run these steps, Download BAM files from ... and put in ...")
+        # else get data from pregenerated data
+        data(ER_lfc, package="NEMpipeline")
     }
 }
