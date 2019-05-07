@@ -5,10 +5,10 @@
 
 # functions
 
-preprocess <- function(fc, experiment_definition) {
+preprocess <- function(fc, experiment_definitions) {
     x <- DGEList(counts=fc$counts, genes=fc$annotation[,c("GeneID","Length")])
 
-    id <- as.character(experiment_definition$Bam.File)  
+    id <- as.character(experiment_definitions$Bam.File)  
     id <- vapply(strsplit(id,"/"),"[",3, FUN.VALUE=character(1))
     id <- vapply(strsplit(id,"-"),"[",2, FUN.VALUE=character(1))
 
@@ -26,7 +26,7 @@ preprocess <- function(fc, experiment_definition) {
     rownames(x$counts) <- lookUp(rownames(x$counts), 'org.Hs.eg', 'SYMBOL')       
     
     # rename colnames(x$counts)
-    samples_foo <- paste(experiment_definition$Gene,experiment_definition$shRNA,experiment_definition$Biological.Rep)
+    samples_foo <- paste(experiment_definitions$Gene,experiment_definitions$shRNA,experiment_definitions$Biological.Rep)
     # don't overwrite samples from config.R
     colnames(x$counts) <- samples_foo
   
@@ -199,10 +199,11 @@ sgene_heatmap <- function(diffexp, diffexp_method, input_file_name) {
 
 # main
 
-step_030_diffexp <- function(project, aligner, diffexp_method, lfc_dir, diffexp_dir) {
+step_030_diffexp <- function(project, aligner, diffexp_method, lfc_dir, diffexp_dir, experiment_definitions) {
+    print("030_diffexp")
     input_file_name <- paste(aligner, project, "Rds", sep=".")
     fc <- readRDS(file.path(lfc_dir, input_file_name))
-    foo <- preprocess(fc)
+    foo <- preprocess(fc, experiment_definitions)
     sel <- foo[[1]]
     controls <- foo[[2]]
     #nsel <- normalize_counts(sel)

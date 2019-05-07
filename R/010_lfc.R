@@ -15,12 +15,12 @@
 #' @return nothing. writes output to file
 #' @export
 step_010_lfc <- function(project, aligner, experiment_definitions, base_input_dir, lfc_dir) {
+    print("010_lfc")
     # set up the input/output locations
 
     # loading bam.files
     filenames <- as.character(experiment_definitions$Bam.File)
     filenames <- paste(base_input_dir, filenames, sep="/")
-    print(filenames)
     if (all(file.exists(filenames))) {
         bamfiles <- Rsamtools::BamFileList(filenames)
         seqinfo(bamfiles[1])
