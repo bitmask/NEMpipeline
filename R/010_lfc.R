@@ -10,19 +10,18 @@
 #'
 #' @param project
 #' @param aligner
-#' @param sampleTable
+#' @param experiment_definitions
 #' @param base_input_dir
 #' @return nothing. writes output to file
 #' @export
-step_010_lfc <- function(project, aligner, sampleTable, base_input_dir, lfc_dir) {
+step_010_lfc <- function(project, aligner, experiment_definitions, base_input_dir, lfc_dir) {
     # set up the input/output locations
-    align_dir <- file.path(base_input_dir, project, "aligned", aligner)
 
     # loading bam.files
-    filenames <- as.character(sampleTable$Bam.File)
-    filenames <- paste(align_dir, filenames, sep="/")
+    filenames <- as.character(experiment_definitions$Bam.File)
+    filenames <- paste(base_input_dir, filenames, sep="/")
     print(filenames)
-    if (TRUE == file.exists(filenames)) {
+    if (all(file.exists(filenames))) {
         bamfiles <- Rsamtools::BamFileList(filenames)
         seqinfo(bamfiles[1])
               
