@@ -23,7 +23,6 @@ preprocess <- function(fc, experiment_definitions) {
     stopifnot(all.equal(as.integer(rownames(x$counts)),x$genes$GeneID))
     rownames(x$counts) <- x$genes$GeneID
     #print("Look Up gene names in UCSC hg38 annotation")
-    columns(org.Hs.eg.db) # force loading of package????
     rownames(x$counts) <- annotate::lookUp(rownames(x$counts), 'org.Hs.eg', 'SYMBOL')       
     
     # rename colnames(x$counts)
