@@ -60,8 +60,8 @@ diffexp_method <- "DESeq"
 #
 ################################################################################
 
-
-step_010_lfc(project, aligner, experiment_definitions, base_input_dir, lfc_dir)
-step_030_diffexp(project, aligner, diffexp_method, lfc_dir, diffexp_dir, experiment_definitions)
-
+run_ER_pipeline <- function() {
+    step_010_lfc(project, aligner, experiment_definitions, base_input_dir, lfc_dir)
+    step_030_diffexp(project, aligner, diffexp_method, lfc_dir, diffexp_dir, experiment_definitions)
+}
 

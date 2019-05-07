@@ -6,7 +6,7 @@
 # functions
 
 preprocess <- function(fc, experiment_definitions) {
-    x <- DGEList(counts=fc$counts, genes=fc$annotation[,c("GeneID","Length")])
+    x <- edgeR::DGEList(counts=fc$counts, genes=fc$annotation[,c("GeneID","Length")])
 
     id <- as.character(experiment_definitions$Bam.File)  
     id <- vapply(strsplit(id,"/"),"[",3, FUN.VALUE=character(1))
@@ -19,11 +19,11 @@ preprocess <- function(fc, experiment_definitions) {
 
 
     # Look up the gene names in the UCSC hg38 annotation
-    print("Are the rownames of the counts matrix in the same order as the gene IDs?")
+    #print("Are the rownames of the counts matrix in the same order as the gene IDs?")
     stopifnot(all.equal(as.integer(rownames(x$counts)),x$genes$GeneID))
     rownames(x$counts) <- x$genes$GeneID
-    print("Look Up gene names in UCSC hg38 annotation")
-    rownames(x$counts) <- lookUp(rownames(x$counts), 'org.Hs.eg', 'SYMBOL')       
+    #print("Look Up gene names in UCSC hg38 annotation")
+    rownames(x$counts) <- annotate::lookUp(rownames(x$counts), 'org.Hs.eg', 'SYMBOL')       
     
     # rename colnames(x$counts)
     samples_foo <- paste(experiment_definitions$Gene,experiment_definitions$shRNA,experiment_definitions$Biological.Rep)
@@ -31,10 +31,10 @@ preprocess <- function(fc, experiment_definitions) {
     colnames(x$counts) <- samples_foo
   
     # print dimensions of the raw counts matrix
-    print("Dimensions of the raw counts matrix:")
+    #print("Dimensions of the raw counts matrix:")
     dim(x)
-    print("Range of absolute unnormalized expression values [cpm]: ")
-    range(cpm(x$counts))
+    #print("Range of absolute unnormalized expression values [cpm]: ")
+    range(edgeR::cpm(x$counts))
     
     # filter out genes that don't vary by more than expr.cutoff in more than 2 experiments
     keep <- rowSums(cpm(x) > expr.cutoff) >= 2
@@ -79,19 +79,19 @@ process_with_edger <- function(sel, controls) {
     # This design matrix simply links each group to the samples that belong to it. Each row of the design matrix        corresponds to a sample whereas each column represents a coefficient corresponding to one of the six groups
 
     # calculate normalization factors
-    norm.factors <- calcNormFactors(data, method = "TMM")
+    norm.factors <- edgeR::calcNormFactors(data, method = "TMM")
     
     # obtain normalized counts for downstream purposes
-    edgeR.cpm <- cpm(norm.factors, normalized.lib.sizes=F)
+    edgeR.cpm <- edgeR::cpm(norm.factors, normalized.lib.sizes=F)
     
     # Dispersion estimation
-    dispersion <- estimateDisp(norm.factors, 
+    dispersion <- edgeR::estimateDisp(norm.factors, 
                                design.succ, 
                                robust=TRUE
                                )
 
     # NB model extended with quasi-likelihood estimation
-    fit <- glmQLFit(dispersion, 
+    fit <- edgeR::glmQLFit(dispersion, 
                     design.succ, 
                     robust=TRUE
                     )
@@ -111,11 +111,11 @@ process_with_edger <- function(sel, controls) {
     contrast.list <- list()
     glmQLFTest.list <- list()
     for (i in 1:length(contrasted.genes)){
-        contrast.list[[i]] <- makeContrasts(contrasts=contrasted.genes[[i]], levels = design.succ)
+        contrast.list[[i]] <- edgeR::makeContrasts(contrasts=contrasted.genes[[i]], levels = design.succ)
     }
             
     for (i in 1:length(contrast.list)){    
-        glmQLFTest.list[[i]] <- glmQLFTest(fit, contrast=contrast.list[[i]]) # An object of class "DGELRT"
+        glmQLFTest.list[[i]] <- edgeR::glmQLFTest(fit, contrast=contrast.list[[i]]) # An object of class "DGELRT"
     }
     return.val <- list()
     for (i in 1:length(glmQLFTest.list)) {
@@ -147,24 +147,24 @@ process_with_deseq <- function(counts, condition) {
     coldata <- data.frame(row.names=colnames(counts), condition)
         
     # actual DESeq2 analysis
-    dds <- DESeqDataSetFromMatrix(countData=counts, 
+    dds <- DESeq2::DESeqDataSetFromMatrix(countData=counts, 
                                   colData=coldata, 
                                   design=~condition
                                   )
     
     # just pulling out the normalizes counts (+devided by sizeFactor)
-    dds <- estimateSizeFactors(dds)
-    DESeq.norm.counts <- counts(dds, normalized=TRUE)
+    dds <- DESeq2::estimateSizeFactors(dds)
+    DESeq.norm.counts <- DESeq2::counts(dds, normalized=TRUE)
     
     # DGE analysis
-    dds <- DESeq(dds)
+    dds <- DESeq2::DESeq(dds)
 
     # to make pairwise comparisons
     # has to be done by looping 
     # over the contrasts (pairwise)
     res.list <- list()
     for(i in 1:length(selected.genes)){
-    res.list[[i]] <- results(dds, 
+    res.list[[i]] <- DESeq2::results(dds, 
                              alpha = 0.05, # alpha refers to FDR cutoff
                              contrast = c("condition","POS.CONTROL",paste0(selected.genes[i]))
                               ) 
@@ -173,7 +173,7 @@ process_with_deseq <- function(counts, condition) {
     
     shrink.list <- list()
     for(i in 1:length(selected.genes)){  
-        shrink.list[[i]] <- lfcShrink(dds, 
+        shrink.list[[i]] <- DESeq2::lfcShrink(dds, 
                                   contrast = c("condition","POS.CONTROL",paste0(selected.genes[i])),
                                   res = res.list[[i]] # this is important, because otherwise the settings above will be neglected - e.g. the p.adjust <0.05 setting
                                   )
