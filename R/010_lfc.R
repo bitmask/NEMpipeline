@@ -22,7 +22,7 @@ step_010_lfc <- function(project, aligner, sampleTable, base_input_dir, lfc_dir)
     filenames <- as.character(sampleTable$Bam.File)
     filenames <- paste(align_dir, filenames, sep="/")
     print(filenames)
-    if (file.exists(filenames)) {
+    if (TRUE == file.exists(filenames)) {
         bamfiles <- Rsamtools::BamFileList(filenames)
         seqinfo(bamfiles[1])
               
@@ -34,8 +34,10 @@ step_010_lfc <- function(project, aligner, sampleTable, base_input_dir, lfc_dir)
         saveRDS(ER_lfc, file.path(lfc_dir, paste(aligner, project, "Rds", sep=".")))
     }
     else {
-        print("using cached file. To run these steps, Download BAM files from ... and put in ...")
+        print("using cached file. To run these steps, Download BAM files from ... and put in the dir specified by base_input_dir")
         # else get data from pregenerated data
         data(ER_lfc, package="NEMpipeline")
+        # and save to local data
+        saveRDS(ER_lfc, file.path(lfc_dir, paste(aligner, project, "Rds", sep=".")))
     }
 }
