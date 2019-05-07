@@ -62,6 +62,10 @@ diffexp_method <- "DESeq"
 #
 ################################################################################
 
+print("definitions")
+print(paste("project ", project))
+print(paste("aligner ", aligner))
+print(paste("exp_def", head(ER_experiment_definitions)))
     step_010_lfc(project, aligner, ER_experiment_definitions, base_input_dir, lfc_dir)
     step_030_diffexp(project, aligner, diffexp_method, lfc_dir, diffexp_dir, ER_experiment_definitions)
 }
