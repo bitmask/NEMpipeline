@@ -10,6 +10,7 @@ Author: Helen Cook <helen.cook@cruk.cam.ac.uk>
 Maintainer: Helen Cook <helen.cook@cruk.cam.ac.uk>
 Description: Pipeline to run various NEM and non-NEM methods on simulated and 2 experimental datasets
 Depends: R (>= 3.5.0)
+BiocViews:
 Imports:
     usethis,
     Rsubread,
