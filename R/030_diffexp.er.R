@@ -5,7 +5,7 @@
 
 # functions
 
-preprocess <- function(fc, experiment_definitions) {
+preprocess <- function(fc, experiment_definitions, expr.cutoff) {
     x <- edgeR::DGEList(counts=fc$counts, genes=fc$annotation[,c("GeneID","Length")])
 
     id <- as.character(experiment_definitions$Bam.File)  
@@ -37,7 +37,7 @@ preprocess <- function(fc, experiment_definitions) {
     range(edgeR::cpm(x$counts))
     
     # filter out genes that don't vary by more than expr.cutoff in more than 2 experiments
-    keep <- rowSums(cpm(x) > expr.cutoff) >= 2
+    keep <- rowSums(edgeR::cpm(x) > expr.cutoff) >= 2
     x <- x[keep, , keep.lib.sizes=FALSE]
 
     # filtering out strange one "RARA 8C B" 
@@ -199,11 +199,11 @@ sgene_heatmap <- function(diffexp, diffexp_method, input_file_name) {
 
 # main
 
-step_030_diffexp <- function(project, aligner, diffexp_method, lfc_dir, diffexp_dir, experiment_definitions) {
+step_030_diffexp <- function(project, aligner, diffexp_method, lfc_dir, diffexp_dir, experiment_definitions, expr.cutoff) {
     print("030_diffexp")
     input_file_name <- paste(aligner, project, "Rds", sep=".")
     fc <- readRDS(file.path(lfc_dir, input_file_name))
-    foo <- preprocess(fc, experiment_definitions)
+    foo <- preprocess(fc, experiment_definitions, expr.cutoff)
     sel <- foo[[1]]
     controls <- foo[[2]]
     #nsel <- normalize_counts(sel)

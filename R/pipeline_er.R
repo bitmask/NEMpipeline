@@ -56,6 +56,10 @@ aligner <- "hisat2"
 # diffexp_methods: DESeq, edgeR
 diffexp_method <- "DESeq" 
 
+
+# 2 experiments must be above this lfc
+expr.cutoff <- 0.5
+
 ################################################################################
 #
 # Pipeline

@@ -18,6 +18,7 @@ Imports:
     edgeR,
     DESeq2,
     annotate,
+    org.Hs.eg,
     org.Hs.eg.db,
     utils,
     RColorBrewer
