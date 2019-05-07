@@ -5,10 +5,10 @@
 
 # functions
 
-preprocess <- function(fc) {
+preprocess <- function(fc, experiment_definition) {
     x <- DGEList(counts=fc$counts, genes=fc$annotation[,c("GeneID","Length")])
 
-    id <- as.character(sampleTable$Bam.File)  
+    id <- as.character(experiment_definition$Bam.File)  
     id <- vapply(strsplit(id,"/"),"[",3, FUN.VALUE=character(1))
     id <- vapply(strsplit(id,"-"),"[",2, FUN.VALUE=character(1))
 
@@ -26,7 +26,7 @@ preprocess <- function(fc) {
     rownames(x$counts) <- lookUp(rownames(x$counts), 'org.Hs.eg', 'SYMBOL')       
     
     # rename colnames(x$counts)
-    samples_foo <- paste(sampleTable$Gene,sampleTable$shRNA,sampleTable$Biological.Rep)
+    samples_foo <- paste(experiment_definition$Gene,experiment_definition$shRNA,experiment_definition$Biological.Rep)
     # don't overwrite samples from config.R
     colnames(x$counts) <- samples_foo
   
