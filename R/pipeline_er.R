@@ -10,7 +10,7 @@
 ################################################################################
 
 # file locations
-#base_input_dir <- "../input"
+base_input_dir <- "~/NEMpipelineBAM"
 
 # output locations
 base_output_dir <- "~/NEMpipelineoutput"
