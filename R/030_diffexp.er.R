@@ -5,7 +5,7 @@
 
 # functions
 
-preprocess <- function(fc, experiment_definitions, expr.cutoff) {
+preprocess <- function(fc, experiment_definitions, expr.cutoff, samples) {
     x <- edgeR::DGEList(counts=fc$counts, genes=fc$annotation[,c("GeneID","Length")])
 
     id <- as.character(experiment_definitions$Bam.File)  
@@ -202,6 +202,9 @@ sgene_heatmap <- function(diffexp, diffexp_method, input_file_name, selected.gen
 
 step_030_diffexp <- function(project, aligner, diffexp_method, lfc_dir, diffexp_dir, experiment_definitions, expr.cutoff, samples, selected.genes) {
     print("030_diffexp")
+    print("selected genes")
+    print(selected.genes)
+    print("selected genes")
     input_file_name <- paste(aligner, project, "Rds", sep=".")
     fc <- readRDS(file.path(lfc_dir, input_file_name))
     foo <- preprocess(fc, experiment_definitions, expr.cutoff, samples)
