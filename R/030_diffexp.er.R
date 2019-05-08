@@ -183,7 +183,7 @@ process_with_deseq <- function(counts, condition, selected.genes) {
     return(shrink.list)
 }
 
-sgene_heatmap <- function(diffexp, diffexp_method, input_file_name, selected.genes) {
+sgene_heatmap <- function(diffexp, diffexp_method, input_file_name, selected.genes, diffexp_dir) {
     stat <- "log2FoldChange"
     d <- data.frame()
     for (sg in selected.genes) {
@@ -224,7 +224,7 @@ step_030_diffexp <- function(project, aligner, diffexp_method, lfc_dir, diffexp_
     output_file_name <- paste(diffexp_method, input_file_name, sep=".")
     saveRDS(diffexp, file.path(diffexp_dir, output_file_name))
     # generate sanity check heatmap
-    sgene_heatmap(diffexp, diffexp_method, input_file_name, selected.genes)
+    sgene_heatmap(diffexp, diffexp_method, input_file_name, selected.genes, diffexp_dir)
 
     # save control data for bnem -- abs values, not lfc
     ctrl <- as.data.frame(rowMeans(sel[!grepl("^NA[0-9]*$",rownames(sel$counts)),controls]$counts))
