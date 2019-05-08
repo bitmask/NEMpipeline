@@ -19,6 +19,7 @@ Imports:
     DESeq2,
     annotate,
     org.Hs.eg.db,
+    pheatmap,
     utils,
     RColorBrewer
 
