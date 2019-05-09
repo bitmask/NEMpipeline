@@ -85,6 +85,6 @@ run_ER_pipeline <- function() {
     #step_030_diffexp(project, aligner, diffexp_method, lfc_dir, diffexp_dir, ER_experiment_definitions, expr.cutoff, samples, selected.genes)
 
     # prepare data in correct format to use with NEMs
-    step_040_prepare_data(adjusted_pvalue_cutoff)
+    step_040_prepare_data(project, diffexp_method, prep_method, diffexp_dir, adjusted_pvalue_cutoff)
 }
 
