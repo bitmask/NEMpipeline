@@ -79,10 +79,10 @@ run_ER_pipeline <- function() {
     print(paste("aligner: ", aligner))
 
     # turn bam files into log fold change
-    step_010_lfc(project, aligner, ER_experiment_definitions, base_input_dir, lfc_dir)
+    #step_010_lfc(project, aligner, ER_experiment_definitions, base_input_dir, lfc_dir)
 
     # calculate differential expression
-    step_030_diffexp(project, aligner, diffexp_method, lfc_dir, diffexp_dir, ER_experiment_definitions, expr.cutoff, samples, selected.genes)
+    #step_030_diffexp(project, aligner, diffexp_method, lfc_dir, diffexp_dir, ER_experiment_definitions, expr.cutoff, samples, selected.genes)
 
     # prepare data in correct format to use with NEMs
     step_040_prepare_data(adjusted_pvalue_cutoff)
