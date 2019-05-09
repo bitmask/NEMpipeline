@@ -7,9 +7,9 @@
 
 # functions
 
-decompose <- function(shrink.list, k) {
+decompose <- function(shrink.list, k, adjusted_pvalue_cutoff) {
     # has to work on binary data because we use original nem method on 4 node subsets
-    prepared <- binary(shrink.list)
+    prepared <- binary(shrink.list, adjusted_pvalue_cutoff)
     filtered <- filter_regulon(prepared, regulon)
     n <- ncol(filtered)
     combinations <- combn(selected.genes, k)
@@ -20,7 +20,7 @@ decompose <- function(shrink.list, k) {
     return(decomposed_list)
 }
 
-binary <- function(shrink.list) {
+binary <- function(shrink.list, adjusted_pvalue_cutoff) {
     # generate discretized matrix
     # (will be needed for downstream modeling of the NEMs)
     sig.names <- c()
@@ -123,7 +123,7 @@ tsne_plot <- function(d_toplot, cluster_method, k, perplexity, colours) {
     ggsave(output_file_name)
 }
 
-bootstrap <- function(shrink.list) {
+bootstrap <- function(shrink.list, adjusted_pvalue_cutoff) {
     # bootstrap from top egenes determined by adjusted_pvalue_cutoff, take half each bootstrap, ten times
     # then compare these graphs
     # does the filtering by regulon, so this does not need to happen again
@@ -185,7 +185,7 @@ random <- function(shrink.list) {
     return(bootstrap_list)
 }
 
-progressive <- function(shrink.list) {
+progressive <- function(shrink.list, adjusted_pvalue_cutoff) {
     # take top 50, 100, 150 and so forth egenes
     
     # 
@@ -237,7 +237,7 @@ progressive <- function(shrink.list) {
     return(bootstrap_list)
 }
 
-lfc <- function(shrink.list) {
+lfc <- function(shrink.list, adjusted_pvalue_cutoff) {
     # use log fold change instead of pvalue because we are more interested in the size of the effect than whether it is significant
     sig.names <- c()
     for(i in 1:length(shrink.list)){
@@ -260,7 +260,7 @@ lfc <- function(shrink.list) {
 
 }
 
-pvalue <- function(shrink.list) {
+pvalue <- function(shrink.list, adjusted_pvalue_cutoff) {
     # padj for mc.eminem
     sig.names <- c()
     for(i in 1:length(shrink.list)){
@@ -395,6 +395,11 @@ write_fly_data <- function(prep_method) {
     }
 }
 
+filter_regulon <- function(prepared, regulon) {
+    #filter for only genes that are found to be regulated by E2
+    return(prepared[which(rownames(prepared) %in% regulon),])
+}
+
 
 # main
 
@@ -423,7 +428,7 @@ step_040_prepare_data <- function(project, diffexp_method, prep_method, diffexp_
             print("read")
             print(input_file_name)
             if (prep_method == "binary") {
-                prepared <- binary(diffexp)
+                prepared <- binary(diffexp, adjusted_pvalue_cutoff)
                 # TODO: make sure s-genes have an effect on themselves as reporters
                 # generate heatmap of the sgenes as reporters
                 #library(ComplexHeatmap)
@@ -435,7 +440,7 @@ step_040_prepare_data <- function(project, diffexp_method, prep_method, diffexp_
                 saveRDS(filtered, file.path(prepared_dir, output_file_name))
             }
             if (prep_method == "cluster_bin") {
-                prepared <- binary(diffexp)
+                prepared <- binary(diffexp, adjusted_pvalue_cutoff)
                 filtered <- filter_regulon(prepared, regulon)
                 ks <- c(5, 15, 30, 100)
                 for (k in ks) {
@@ -445,13 +450,13 @@ step_040_prepare_data <- function(project, diffexp_method, prep_method, diffexp_
                 }
             }
             if (prep_method == "lfc") {
-                prepared <- lfc(diffexp)
+                prepared <- lfc(diffexp, adjusted_pvalue_cutoff)
                 filtered <- filter_regulon(prepared, regulon)
                 output_file_name <- paste(prep_method, input_file_name, sep=".")
                 saveRDS(filtered, file.path(prepared_dir, output_file_name))
             }
             if (prep_method == "pvalue") {
-                prepared <- pvalue(diffexp)
+                prepared <- pvalue(diffexp, adjusted_pvalue_cutoff)
                 filtered <- filter_regulon(prepared, regulon)
                 output_file_name <- paste(prep_method, input_file_name, sep=".")
                 saveRDS(filtered, file.path(prepared_dir, output_file_name))
@@ -471,7 +476,7 @@ step_040_prepare_data <- function(project, diffexp_method, prep_method, diffexp_
             }
             if (prep_method == "decompose") {
                 # filters
-                prepared_list <- decompose(diffexp, decompose_k_nodes)
+                prepared_list <- decompose(diffexp, decompose_k_nodes, adjusted_pvalue_cutoff)
                 acc <- 1
                 for (i in 1:length(prepared_list)) {
                     output_file_name <- paste(paste(prep_method, decompose_k_nodes, acc, sep="_"), input_file_name, sep=".")
@@ -481,7 +486,7 @@ step_040_prepare_data <- function(project, diffexp_method, prep_method, diffexp_
             }
             if (prep_method == "bootstrap") {
                 # filters
-                prepared_list <- bootstrap(diffexp)
+                prepared_list <- bootstrap(diffexp, adjusted_pvalue_cutoff)
                 acc <- 1
                 for (i in 1:length(prepared_list)) {
                     output_file_name <- paste(paste(prep_method, acc, sep="_"), input_file_name, sep=".")
@@ -500,7 +505,7 @@ step_040_prepare_data <- function(project, diffexp_method, prep_method, diffexp_
             }
             if (prep_method == "progressive") {
                 # filters
-                prepared_list <- progressive(diffexp)
+                prepared_list <- progressive(diffexp, adjusted_pvalue_cutoff)
                 acc <- names(prepared_list)
                 for (i in 1:length(prepared_list)) {
                     output_file_name <- paste(paste(prep_method, acc[[i]], sep="_"), input_file_name, sep=".")
@@ -511,7 +516,7 @@ step_040_prepare_data <- function(project, diffexp_method, prep_method, diffexp_
                 # write the cleaned, non differential data for fgnem
                 #fgcounts <- as.data.frame(diffexp)
                 # write lfc data for fgnem
-                fgcounts <- lfc(diffexp)
+                fgcounts <- lfc(diffexp, adjusted_pvalue_cutoff)
                 fgcounts <- scale(fgcounts)
 
                 # the format fgnem expects is weird
