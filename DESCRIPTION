@@ -20,8 +20,11 @@ Imports:
     annotate,
     org.Hs.eg.db,
     pheatmap,
+    fgsea,
+    ggplot2,
     utils,
     RColorBrewer
+
 
 License: MIT + file LICENSE
 Encoding: UTF-8
