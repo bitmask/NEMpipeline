@@ -35,11 +35,10 @@ run_ER_pipeline <- function() {
         }
     }
 
-    # project name and definitions
+    # project name and definitions from included files
     project <- "er"
-    projects_definition <- list("er" = list("regulon" = "Jagannathan&Robinson-Rechavi2011.csv",
-                                            "experiment" = "experiment_definitions.csv"))
     data(ER_experiment_definitions, package="NEMpipeline")
+    data(ER_regulon, package="NEMpipeline")
 
     # read in the sample.table excel sheet specifying the experiment details
     #csv.file <- file.path(base_input_dir, project, projects_definition[[project]]$experiment)
@@ -81,6 +80,17 @@ run_ER_pipeline <- function() {
 
     # threshold for determining whether lfc is significant and there is an effect or not
     adjusted_pvalue_cutoff <- 0.05
+
+
+    # regulon to limit differentially expressed genes to
+    # gives 1591 genes
+    infile <- file.path(base_input_dir, project, projects_definition[[project]]$regulon)
+    if (file.exists(infile)) {
+        meta <- read.csv(infile)
+        regulon <- unique(meta$Gene)
+    }
+
+
 
     ################################################################################
     #
