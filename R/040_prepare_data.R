@@ -403,7 +403,7 @@ filter_regulon <- function(prepared, regulon) {
 
 # main
 
-step_040_prepare_data <- function(project, diffexp_method, prep_method, diffexp_dir, prepared_dir, adjusted_pvalue_cutoff, regulon) {
+step_040_prepare_data <- function(project, aligner, diffexp_method, prep_method, diffexp_dir, prepared_dir, adjusted_pvalue_cutoff, regulon) {
     matching <- dir(diffexp_dir, pattern=diffexp_method)
     #if (length(matching) != 1) {
     #    warning("found multiple matching input files")
@@ -419,7 +419,7 @@ step_040_prepare_data <- function(project, diffexp_method, prep_method, diffexp_
         # filter for project name
         matching <- Filter(function(x) grepl(paste("\\.", project, "\\.", sep=""), x), matching)
         for (input_file_name in matching) {
-            found <- grep(paste(project, "Rds", sep="."), input_file_name)
+            found <- grep(paste(diffexp_method, aligner, project, "Rds", sep="."), input_file_name)
             if(length(found) < 1  ) {
                 next
             }

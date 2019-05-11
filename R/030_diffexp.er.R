@@ -191,7 +191,7 @@ sgene_heatmap <- function(diffexp, diffexp_method, input_file_name, selected.gen
     }
     rownames(d) <- paste("ko", selected.genes)
     colnames(d) <- selected.genes
-    output_file_name <- paste("sgene_heatmap", diffexp_method, input_file_name)
+    output_file_name <- paste("sgene_heatmap", diffexp_method, input_file_name, "pdf", sep=".")
     pdf(file.path(diffexp_dir, output_file_name))
     pheatmap(d, cluster_rows=FALSE, cluster_cols=FALSE)
     # rows are knockdowns
