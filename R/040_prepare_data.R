@@ -403,7 +403,7 @@ filter_regulon <- function(prepared, regulon) {
 
 # main
 
-step_040_prepare_data <- function(project, diffexp_method, prep_method, diffexp_dir, adjusted_pvalue_cutoff, regulon) {
+step_040_prepare_data <- function(project, diffexp_method, prep_method, diffexp_dir, prepared_dir, adjusted_pvalue_cutoff, regulon) {
     matching <- dir(diffexp_dir, pattern=diffexp_method)
     #if (length(matching) != 1) {
     #    warning("found multiple matching input files")
