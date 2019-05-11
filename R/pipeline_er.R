@@ -35,9 +35,12 @@ run_ER_pipeline <- function() {
         }
     }
 
-    # project name and definitions from included files
+    # project name and definitions from included files from included files
     project <- "er"
     data(ER_experiment_definitions, package="NEMpipeline")
+
+    # regulon to limit differentially expressed genes to
+    # gives 1591 genes
     data(ER_regulon, package="NEMpipeline")
 
     # read in the sample.table excel sheet specifying the experiment details
@@ -82,15 +85,6 @@ run_ER_pipeline <- function() {
     adjusted_pvalue_cutoff <- 0.05
 
 
-    # regulon to limit differentially expressed genes to
-    # gives 1591 genes
-    infile <- file.path(base_input_dir, project, projects_definition[[project]]$regulon)
-    if (file.exists(infile)) {
-        meta <- read.csv(infile)
-        regulon <- unique(meta$Gene)
-    }
-
-
 
     ################################################################################
     #
@@ -109,6 +103,6 @@ run_ER_pipeline <- function() {
     #step_030_diffexp(project, aligner, diffexp_method, lfc_dir, diffexp_dir, ER_experiment_definitions, expr.cutoff, samples, selected.genes)
 
     # prepare data in correct format to use with NEMs
-    step_040_prepare_data(project, diffexp_method, prep_method, diffexp_dir, adjusted_pvalue_cutoff)
+    step_040_prepare_data(project, diffexp_method, prep_method, diffexp_dir, adjusted_pvalue_cutoff, ER_regulon)
 }
 

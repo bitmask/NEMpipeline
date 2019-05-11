@@ -7,7 +7,7 @@
 
 # functions
 
-decompose <- function(shrink.list, k, adjusted_pvalue_cutoff) {
+decompose <- function(shrink.list, k, adjusted_pvalue_cutoff, regulon) {
     # has to work on binary data because we use original nem method on 4 node subsets
     prepared <- binary(shrink.list, adjusted_pvalue_cutoff)
     filtered <- filter_regulon(prepared, regulon)
@@ -123,7 +123,7 @@ tsne_plot <- function(d_toplot, cluster_method, k, perplexity, colours) {
     ggsave(output_file_name)
 }
 
-bootstrap <- function(shrink.list, adjusted_pvalue_cutoff) {
+bootstrap <- function(shrink.list, adjusted_pvalue_cutoff, regulon) {
     # bootstrap from top egenes determined by adjusted_pvalue_cutoff, take half each bootstrap, ten times
     # then compare these graphs
     # does the filtering by regulon, so this does not need to happen again
@@ -403,7 +403,7 @@ filter_regulon <- function(prepared, regulon) {
 
 # main
 
-step_040_prepare_data <- function(project, diffexp_method, prep_method, diffexp_dir, adjusted_pvalue_cutoff) {
+step_040_prepare_data <- function(project, diffexp_method, prep_method, diffexp_dir, adjusted_pvalue_cutoff, regulon) {
     matching <- dir(diffexp_dir, pattern=diffexp_method)
     #if (length(matching) != 1) {
     #    warning("found multiple matching input files")
@@ -476,7 +476,7 @@ step_040_prepare_data <- function(project, diffexp_method, prep_method, diffexp_
             }
             if (prep_method == "decompose") {
                 # filters
-                prepared_list <- decompose(diffexp, decompose_k_nodes, adjusted_pvalue_cutoff)
+                prepared_list <- decompose(diffexp, decompose_k_nodes, adjusted_pvalue_cutoff, regulon)
                 acc <- 1
                 for (i in 1:length(prepared_list)) {
                     output_file_name <- paste(paste(prep_method, decompose_k_nodes, acc, sep="_"), input_file_name, sep=".")
@@ -486,7 +486,7 @@ step_040_prepare_data <- function(project, diffexp_method, prep_method, diffexp_
             }
             if (prep_method == "bootstrap") {
                 # filters
-                prepared_list <- bootstrap(diffexp, adjusted_pvalue_cutoff)
+                prepared_list <- bootstrap(diffexp, adjusted_pvalue_cutoff, regulon)
                 acc <- 1
                 for (i in 1:length(prepared_list)) {
                     output_file_name <- paste(paste(prep_method, acc, sep="_"), input_file_name, sep=".")
