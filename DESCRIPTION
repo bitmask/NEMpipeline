@@ -22,6 +22,12 @@ Imports:
     pheatmap,
     fgsea,
     ggplot2,
+    nem,
+    snow,
+    bnem,
+    CellNOptR,
+    lem,
+    mnem,
     utils,
     RColorBrewer
 

@@ -72,6 +72,37 @@ run_ER_pipeline <- function() {
     # cluster_bin - cluster binary expression data to generate ensemble egenes to run nems on
     prep_method <- "binary"
 
+    # Which NEM methods should be applied?
+    # The way the data is prepared determines which NEM methods are compatible with which prepared data
+    #
+    # nem_methods: search, triples, pairwise, BN.exhaustive, BN.greedy, ModuleNetwork.orig, ModuleNetwork, mc.eminem, depn, lem
+        # search -- Markowetz 2005 "Non-transcriptional pathway features reconstructed from secondary effects of RNA interference"
+        # triples -- Markowetz 2007 "Nested effects models for high-dimensional phenotyping screens"
+        # pairwise -- Markowetz 2007 "Nested effects models for high-dimensional phenotyping screens"
+        # BN.exhaustive -- Zeller 2008 "A Bayesian Network View on Nested Effects Models"
+        # BN.greedy -- Zeller 2008 "A Bayesian Network View on Nested Effects Models"
+        # ModuleNetwork.orig -- Frohlich 2007 "Large scale statistical inference of signaling pathways from RNAi and microarray data"
+        # ModuleNetwork -- Frohlich 2008, "Estimating large-scale signaling networks through nested effect models with intervention effects from microarray data"
+        # nem.greedyMAP -  Tresch 2008 "Structure Learning in Nested Effects Models"
+        # nem.greedy -- H. Fröhlich, A. Tresch, T. Beißbarth, Nested Effects Models for Learning Signaling Networks from Perturbation Data, Biometrical Journal, 2(51):304 - 323, 2009
+        # mc.eminem -- Niederberger 2012 "MC EMiNEM Maps the Interaction Landscape of the Mediator"
+        # depn -- Frohlich 2009 "Deterministic Effects Propagation Networks for reconstructing protein signaling networks from multiple interventions"
+        # lem -- Szczurek 2016 "Linear effects models of signaling pathways from combinatorial perturbation data"
+    nem_method_compat <- list("binary" = c("greedy", "search", "nem.greedy", "triples", "pairwise", "ModuleNetwork", "ModuleNetwork.orig"), 
+                         "cluster_bin" = c("greedy", "search", "nem.greedy", "triples", "pairwise", "ModuleNetwork", "ModuleNetwork.orig"), 
+                         "lfc" = c("mnem", "bnem", "lem", "mnem", "mc.eminem"),
+                         "pvalue" = c("mc.eminem", "bnem", "lem", "mnem", "mc.eminem"),
+                         "boolean" = c("bnem"), 
+                         "geneset" = c("mc.eminem"),
+                         "bootstrap" = c("nem.greedy"),
+                         "random" = c("nem.greedy"),
+                         "decompose" = c("search"),
+                         "progressive" = c("nem.greedy"),
+                         "sc" = c("lem")
+                         )
+
+
+
     # successful screens
     samples <- c("EP300 12BR3 A", "EP300 12BR3 B", "EP300 12BR3 C", "ESRRA 2C A", "ESRRA 2C B", "ESRRA 2C C", "NCOA3 1DR3 A", "NCOA3 1DR3 B", "NCOA3 1DR3 C", "NCOA3 2BR A", "NCOA3 2BR B", "NCOA3 2BR C", "NR2F2 17AR3 A", "NR2F2 17AR3 B", "NR2F2 17AR3 C", "NRIP1 5C A", "NRIP1 5C B", "NRIP1 6A C", "RARA 7B A", "RARA 8C A", "RARA 8C C", "SUMO1 M1 A", "SUMO1 M1 B",     "SUMO1 M1 C",    "SUMO1 M35 A",    "SUMO1 M35 B",    "SUMO1 M35 C", "SUMO3 24AR3 A", "SUMO3 24AR3 B", "SUMO3 24AR3 C", "SUMO3 M16 A", "SUMO3 M16 C", "TRIM33 13CR3 A", "TRIM33 13CR3 B", "TRIM33 13CR3 C",     "TRIM33 M2 B", "TRIM33 M2 C", "ZMIZ1 19AR3 A", "ZMIZ1 19AR3 B", "ZMIZ1 19AR3 C", "ZMIZ1 22m35b A", "ZMIZ1 22m35b B", "ZMIZ1 22m35b C")
 
@@ -84,7 +115,8 @@ run_ER_pipeline <- function() {
     # threshold for determining whether lfc is significant and there is an effect or not
     adjusted_pvalue_cutoff <- 0.05
 
-
+    
+    report_attached_egenes <- FALSE
 
     ################################################################################
     #
@@ -104,5 +136,8 @@ run_ER_pipeline <- function() {
 
     # prepare data in correct format to use with NEMs
     step_040_prepare_data(project, aligner, diffexp_method, prep_method, diffexp_dir, prepared_dir, adjusted_pvalue_cutoff, ER_regulon)
+
+    # nems
+    step_050_nems(project, aligner, diffexp_method, prep_method, nem_method, nem_method_compat, prepared_dir, nems_dir, egenes_dir, report_attached_egenes)
 }
 
