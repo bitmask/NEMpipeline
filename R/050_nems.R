@@ -2,7 +2,6 @@
 # do nem calculations
 
 
-source("config.R")
 
 attach_egenes <- function(nem_model, egenes) {
     # we are going to get $graph, an adjacency matrix and $mappos, a list of lists of egenes
