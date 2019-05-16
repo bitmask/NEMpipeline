@@ -259,11 +259,11 @@ step_050_nems <- function(project, aligner, diffexp_method, prep_method, nem_met
             # TODO: make sure all errors are reported
         }
     }
-}
-output_file_name <- file.path(nems_dir, benchmark_file)
-if (file.exists(output_file_name)) {
-    write.table(timing, output_file_name, row.names=FALSE, col.names=FALSE, sep="\t", quote=FALSE, append=TRUE)
-} else {
-    write.table(timing, output_file_name, row.names=FALSE, col.names=TRUE, sep="\t", quote=FALSE)
+    output_file_name <- file.path(nems_dir, benchmark_file)
+    if (file.exists(output_file_name)) {
+        write.table(timing, output_file_name, row.names=FALSE, col.names=FALSE, sep="\t", quote=FALSE, append=TRUE)
+    } else {
+        write.table(timing, output_file_name, row.names=FALSE, col.names=TRUE, sep="\t", quote=FALSE)
+    }
 }
 
