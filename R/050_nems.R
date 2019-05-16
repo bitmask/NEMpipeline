@@ -206,7 +206,7 @@ run_nems <- function(nem_method, expr_data, prepared_dir, nems_dir, egenes_dir) 
 }
 
 
-step_050_nems <- function(project, aligner, diffexp_method, prep_method, nem_method, nem_method_compat, prepared_dir, nems_dir, report_attached_egenes) {
+step_050_nems <- function( project, aligner, diffexp_method, prep_method, nem_method, nem_method_compat, prepared_dir, nems_dir, egenes_dir, report_attached_egenes) {
     # main
     # read all expression data that has been written into data dir, and calculate nems for that, by each method
     timing <- data.frame(input=character(0), nem_method=character(0), seconds=numeric(0), date=character(0), stringsAsFactors=FALSE)
