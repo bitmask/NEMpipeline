@@ -1,5 +1,5 @@
 
-step_042_simulate_data <- function(project, alpha, beta, prepared_dir, lfc=FALSE) {
+step_042_simulate_data <- function(project, alpha, beta, prepared_dir, lfc=FALSE, plots=FALSE) {
     m <- matrix( c( 0, 1, 1, 0, 0, 0, 0,
                     0, 0, 0, 1, 1, 0, 0,
                     0, 0, 0, 0, 0, 1, 0,
@@ -11,21 +11,28 @@ step_042_simulate_data <- function(project, alpha, beta, prepared_dir, lfc=FALSE
     colnames(m) <- letters[1:7]
 
     generated_data <- make_data(m)
-    #heatmap(as.matrix(generated_data), scale="none", Rowv=NA, Colv=NA)
+    if (plots) {
+        heatmap(as.matrix(generated_data), scale="none", Rowv=NA, Colv=NA)
+    }
     generated_data <- set_fp_rate(generated_data, alpha)
     generated_data <- set_fn_rate(generated_data, beta)
-    #heatmap(as.matrix(generated_data), scale="none", Rowv=NA, Colv=NA)
-    
-    if (lfc) {
-        generated_data <- make_lfc(generated_data)
+    if (plots) {
+        heatmap(as.matrix(generated_data), scale="none", Rowv=NA, Colv=NA)
     }
-
+    
     prep_method <- paste(alpha, beta, sep="_")
-    output_file_name <- paste(prep_method, project, "Rds", sep=".")
+    if (lfc) {
+        lfc_data <- make_lfc(generated_data)
+        output_file_name <- paste("lfc", prep_method, project, "Rds", sep=".")
+        saveRDS(lfc_data, file.path(prepared_dir, output_file_name))
+        output_file_name <- paste("lfc", prep_method, project, "csv", sep=".")
+        write.csv(lfc_data, file.path(prepared_dir, output_file_name))
+    }
+    output_file_name <- paste("binary", prep_method, project, "Rds", sep=".")
     saveRDS(generated_data, file.path(prepared_dir, output_file_name))
 }
 
-make_lfc <- fuction(generated_data) {
+make_lfc <- function(generated_data) {
     # convert binary data to lfc 
     
     len <- 2 * nrow(generated_data) * ncol(generated_data)

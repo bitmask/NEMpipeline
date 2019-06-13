@@ -1,8 +1,8 @@
 
-# execute the analysis pipeline for the ER data
+# execute the analysis pipeline for the simulated data
 # each step will write intermediate output files to disk
 
-run_ER_pipeline <- function() {
+run_simulated_pipeline <- function() {
 
     ################################################################################
     #
@@ -35,30 +35,7 @@ run_ER_pipeline <- function() {
         }
     }
 
-    benchmark_file <- "timing.log"
-
-    # project name and definitions from included files from included files
-    project <- "er"
-    data(ER_experiment_definitions, package="NEMpipeline")
-
-    # regulon to limit differentially expressed genes to
-    # gives 1591 genes
-    data(ER_regulon, package="NEMpipeline")
-
-    # read in the sample.table excel sheet specifying the experiment details
-    #csv.file <- file.path(base_input_dir, project, projects_definition[[project]]$experiment)
-    #if (file.exists(csv.file)) {
-        #experiment_definitions <- read.csv(csv.file)
-        #sampleTable <- experiment_definitions
-    #}
-
-
-
-    # aligners: hisat2, bowtie
-    aligner <- "hisat2" 
-
-    # diffexp_methods: DESeq, edgeR
-    diffexp_method <- "DESeq" 
+    benchmark_file <- "timing_simulated.log"
 
     # prep_methods: binary, lfc, pvalue, boolean, fgnem, decompose, progressive, bootstrap, random, geneset, cluster_bin
     # binary - discretize expression data to 0 or 1 (there is an effect or not)
@@ -105,18 +82,7 @@ run_ER_pipeline <- function() {
 
     nem_method <- "triples"
 
-    # successful screens
-    samples <- c("EP300 12BR3 A", "EP300 12BR3 B", "EP300 12BR3 C", "ESRRA 2C A", "ESRRA 2C B", "ESRRA 2C C", "NCOA3 1DR3 A", "NCOA3 1DR3 B", "NCOA3 1DR3 C", "NCOA3 2BR A", "NCOA3 2BR B", "NCOA3 2BR C", "NR2F2 17AR3 A", "NR2F2 17AR3 B", "NR2F2 17AR3 C", "NRIP1 5C A", "NRIP1 5C B", "NRIP1 6A C", "RARA 7B A", "RARA 8C A", "RARA 8C C", "SUMO1 M1 A", "SUMO1 M1 B",     "SUMO1 M1 C",    "SUMO1 M35 A",    "SUMO1 M35 B",    "SUMO1 M35 C", "SUMO3 24AR3 A", "SUMO3 24AR3 B", "SUMO3 24AR3 C", "SUMO3 M16 A", "SUMO3 M16 C", "TRIM33 13CR3 A", "TRIM33 13CR3 B", "TRIM33 13CR3 C",     "TRIM33 M2 B", "TRIM33 M2 C", "ZMIZ1 19AR3 A", "ZMIZ1 19AR3 B", "ZMIZ1 19AR3 C", "ZMIZ1 22m35b A", "ZMIZ1 22m35b B", "ZMIZ1 22m35b C")
-
-    selected.genes <- unique(vapply(strsplit(samples," "),"[",1, FUN.VALUE=character(1)))
-
-    # 2 experiments must be above this lfc
-    expr.cutoff <- 0.5
-
-
-    # threshold for determining whether lfc is significant and there is an effect or not
-    adjusted_pvalue_cutoff <- 0.05
-
+    selected.genes <- letters[1:7]
     
     report_attached_egenes <- FALSE
 
@@ -126,18 +92,15 @@ run_ER_pipeline <- function() {
     #
     ################################################################################
 
-    print("Running ER pipeline")
+    print("Running simulated pipeline")
     print(paste("project: ", project))
-    print(paste("aligner: ", aligner))
 
-    # turn bam files into log fold change
-    #step_010_lfc(project, aligner, ER_experiment_definitions, base_input_dir, lfc_dir)
+    for (alpha in seq(0, 0.5, 0.05)) {
+        for (beta in seq(0, 0.5, 0.05)) {
+            step_042_simulate_data(project, alpha, beta, prepared_dir, lfc=TRUE)
+        }
+    }
 
-    # calculate differential expression
-    #step_030_diffexp(project, aligner, diffexp_method, lfc_dir, diffexp_dir, ER_experiment_definitions, expr.cutoff, samples, selected.genes)
-
-    # prepare data in correct format to use with NEMs
-    #step_040_prepare_data(project, aligner, diffexp_method, prep_method, diffexp_dir, prepared_dir, adjusted_pvalue_cutoff, ER_regulon)
 
     # nems
     step_050_nems(project, aligner, diffexp_method, prep_method, nem_method, nem_method_compat, prepared_dir, nems_dir, egenes_dir, benchmark_file, report_attached_egenes)

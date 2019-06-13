@@ -187,7 +187,7 @@ run_nems <- function(nem_method, expr_data, prepared_dir, nems_dir, egenes_dir) 
         results <- scoreBestModelEstimate(eg, params=params, doTransitivity=FALSE, summarization=marginop)
     } else {
         contr <- c(0.15,0.05)
-        if (nem_method %in% unique(c(nem_methods[['binary']], "search", "nem.greedy", "triples", "pairwise", "ModuleNetwork", "ModuleNetwork.orig"))) {
+        if (nem_method %in% unique(c(nem_method_compat[['binary']], "search", "nem.greedy", "triples", "pairwise", "ModuleNetwork", "ModuleNetwork.orig"))) {
             type <- "mLL" 
         } else {
             type <- "CONTmLLBayes"
@@ -195,7 +195,7 @@ run_nems <- function(nem_method, expr_data, prepared_dir, nems_dir, egenes_dir) 
         hyper <- nem::set.default.parameters(selected.genes, 
                                    para=contr, 
                                    type = type)
-        b <- nem::nem.bootstrap(expr_data,
+        b <- nem::nem.bootstrap(as.matrix(expr_data),
             inference=nem_method,
             control=hyper, 
             verbose=F,
@@ -210,7 +210,7 @@ step_050_nems <- function( project, aligner, diffexp_method, prep_method, nem_me
     # main
     # read all expression data that has been written into data dir, and calculate nems for that, by each method
     timing <- data.frame(input=character(0), nem_method=character(0), seconds=numeric(0), date=character(0), stringsAsFactors=FALSE)
-    matching <- dir(prepared_dir, pattern=prep_method)
+    matching <- dir(prepared_dir, pattern=project)
     #if (length(matching) > 1 && (prep_method != "bootstrap" && prep_method != "progressive")) {
     #    warning(paste0("found multiple matching input files for ", prep_method, " ", matching))
     #} else { if (length(matching) == 0) {
