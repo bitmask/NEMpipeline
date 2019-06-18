@@ -1,5 +1,5 @@
 
-step_042_simulate_data <- function(project, alpha, beta, prepared_dir, lfc=FALSE, plots=FALSE) {
+step_042_simulate_data <- function(project, alpha, beta, perturbed_genes, prepared_dir, lfc=FALSE, plots=FALSE) {
     m <- matrix( c( 0, 1, 1, 0, 0, 0, 0,
                     0, 0, 0, 1, 1, 0, 0,
                     0, 0, 0, 0, 0, 1, 0,
@@ -7,8 +7,8 @@ step_042_simulate_data <- function(project, alpha, beta, prepared_dir, lfc=FALSE
                     0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0  ), byrow=TRUE, nrow=7, ncol=7)
-    rownames(m) <- letters[1:7]
-    colnames(m) <- letters[1:7]
+    rownames(m) <- perturbed_genes
+    colnames(m) <- perturbed_genes
 
     generated_data <- make_data(m)
     if (plots) {
@@ -84,7 +84,7 @@ make_data <- function(m) {
 
     complexes <- list()
     for (node_idx in 1:length(rownames(m))) {
-        complexes[[node_idx]] <- walk_tree(node_idx, m, perturbed)
+        complexes[[node_idx]] <- walk_tree(node_idx, m)
     }
 
     for (path in unlist(complexes)) {
@@ -104,12 +104,12 @@ make_data <- function(m) {
 }
 
 
-walk_tree <- function(node_idx, m, perturbed) {
-    complexes <- wt_h(as.character(node_idx), m, perturbed)
+walk_tree <- function(node_idx, m) {
+    complexes <- wt_h(as.character(node_idx), m)
     return(complexes)
 }
 
-wt_h <- function(path, m, perturbed) {
+wt_h <- function(path, m) {
     x <- strsplit(path, "_")[[1]]
     last <- x[[length(x)]]
     first <- x[[1]]
@@ -122,7 +122,7 @@ wt_h <- function(path, m, perturbed) {
     if (length(newnodes) > 0) {
         for (i in 1:length(newnodes)) {
             newpath <- paste(newnodes[[i]], path, sep="_")
-            complexes[[i]] <- wt_h(newpath, m, perturbed)
+            complexes[[i]] <- wt_h(newpath, m)
         }
     } else {
         complexes <- path

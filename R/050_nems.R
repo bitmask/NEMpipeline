@@ -211,13 +211,6 @@ step_050_nems <- function( project, aligner, diffexp_method, prep_method, nem_me
     # read all expression data that has been written into data dir, and calculate nems for that, by each method
     timing <- data.frame(input=character(0), nem_method=character(0), seconds=numeric(0), date=character(0), stringsAsFactors=FALSE)
     matching <- dir(prepared_dir, pattern=project)
-    #if (length(matching) > 1 && (prep_method != "bootstrap" && prep_method != "progressive")) {
-    #    warning(paste0("found multiple matching input files for ", prep_method, " ", matching))
-    #} else { if (length(matching) == 0) {
-    #    warning(paste0("found no matching input files for ", prep_method))
-    #}}
-    # filter for project name
-    matching <- Filter(function(x) grepl(paste("\\.", project, "\\.", sep=""), x), matching)
     matching <- Filter(function(x) grepl(paste("\\.", "Rds", sep=""), x), matching)
     for (input_file_name in matching) {
         #TODO: loading RDS needs to not happen for fgnem
