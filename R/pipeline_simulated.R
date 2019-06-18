@@ -107,6 +107,7 @@ run_simulated_pipeline <- function() {
     step_050_nems(project, aligner, diffexp_method, prep_method, nem_method, nem_method_compat, prepared_dir, nems_dir, egenes_dir, benchmark_file, report_attached_egenes)
 
     # run HIS matlab code here
+    r <- readline(prompt="Run HIS matlab code in matlab now and press enter ")
 
     # read in matlab output and save as an R object so we can generate network comparison plots
     step_051_his(project, "his", perturbed_genes, prepared_dir, nems_dir)
