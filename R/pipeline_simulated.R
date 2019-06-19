@@ -112,7 +112,7 @@ run_simulated_pipeline <- function() {
 
 
     # nems
-    nem_method <- "greedy"
+    nem_method <- "nem.greedy"
     step_050_nems(project, aligner, diffexp_method, prep_method, nem_method, nem_method_compat, prepared_dir, nems_dir, egenes_dir, benchmark_file, report_attached_egenes, perturbed_genes)
 
     # run HIS matlab code here
