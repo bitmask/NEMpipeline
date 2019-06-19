@@ -102,7 +102,6 @@ run_simulated_pipeline <- function() {
     
     perturbed_genes <- letters[1:7]
 
-    selected.genes <- perturbed_genes  # TODO fix this
     step_042_simulate_data(project, 0, 0, perturbed_genes, prepared_dir, lfc=TRUE)
     for (alpha in seq(0.05, 0.5, 0.1)) {
         for (beta in seq(0.05, 0.5, 0.1)) {

@@ -28,7 +28,7 @@ attach_egenes <- function(nem_model, egenes) {
 
 
 # functions
-run_nems <- function(nem_method, expr_data, prepared_dir, nems_dir, egenes_dir, selected.genes) {
+run_nems <- function(nem_method, expr_data, prepared_dir, nems_dir, egenes_dir, selected.genes, nem_method_compat) {
     print("starting running nems\n")
     start_time <- Sys.time()
     if (nem_method == "bnem") {
@@ -219,7 +219,7 @@ step_050_nems <- function( project, aligner, diffexp_method, prep_method, nem_me
             print(paste0("nem method: ", nem_method))
             tryCatch ({
                 start_time <- Sys.time()
-                nem_model <- run_nems(nem_method, expr_data, prepared_dir, nems_dir, egenes_dir, selected.genes)
+                nem_model <- run_nems(nem_method, expr_data, prepared_dir, nems_dir, egenes_dir, selected.genes, nem_method_compat)
                 end_time <- Sys.time()
                 # save models
                 if (! ("graph" %in% names(nem_model))) {
