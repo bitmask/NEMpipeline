@@ -28,7 +28,7 @@ attach_egenes <- function(nem_model, egenes) {
 
 
 # functions
-run_nems <- function(nem_method, expr_data, prepared_dir, nems_dir, egenes_dir) {
+run_nems <- function(nem_method, expr_data, prepared_dir, nems_dir, egenes_dir, selected.genes) {
     print("starting running nems\n")
     start_time <- Sys.time()
     if (nem_method == "bnem") {
@@ -206,7 +206,7 @@ run_nems <- function(nem_method, expr_data, prepared_dir, nems_dir, egenes_dir) 
 }
 
 
-step_050_nems <- function( project, aligner, diffexp_method, prep_method, nem_method, nem_method_compat, prepared_dir, nems_dir, egenes_dir, benchmark_file, report_attached_egenes) {
+step_050_nems <- function( project, aligner, diffexp_method, prep_method, nem_method, nem_method_compat, prepared_dir, nems_dir, egenes_dir, benchmark_file, report_attached_egenes, selected.genes) {
     # main
     # read all expression data that has been written into data dir, and calculate nems for that, by each method
     timing <- data.frame(input=character(0), nem_method=character(0), seconds=numeric(0), date=character(0), stringsAsFactors=FALSE)
@@ -219,7 +219,7 @@ step_050_nems <- function( project, aligner, diffexp_method, prep_method, nem_me
             print(paste0("nem method: ", nem_method))
             tryCatch ({
                 start_time <- Sys.time()
-                nem_model <- run_nems(nem_method, expr_data, prepared_dir, nems_dir, egenes_dir)
+                nem_model <- run_nems(nem_method, expr_data, prepared_dir, nems_dir, egenes_dir, selected.genes)
                 end_time <- Sys.time()
                 # save models
                 if (! ("graph" %in% names(nem_model))) {

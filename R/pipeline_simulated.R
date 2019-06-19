@@ -10,6 +10,8 @@ run_simulated_pipeline <- function() {
     #
     ################################################################################
 
+    project <- "simulated"
+
     # file locations
     base_input_dir <- "~/NEMpipelineBAM"
 
@@ -84,6 +86,11 @@ run_simulated_pipeline <- function() {
 
     report_attached_egenes <- FALSE
 
+    # parameters to control when to draw output networks
+    draw_nets_max_nodes <- 20  # don't draw if networks are bigger than this
+    draw_nets_max_count <- 10   # don't draw if there are more networks than this
+
+
     ################################################################################
     #
     # Pipeline
@@ -95,6 +102,8 @@ run_simulated_pipeline <- function() {
     
     perturbed_genes <- letters[1:7]
 
+    selected.genes <- perturbed_genes  # TODO fix this
+    step_042_simulate_data(project, 0, 0, perturbed_genes, prepared_dir, lfc=TRUE)
     for (alpha in seq(0.05, 0.5, 0.1)) {
         for (beta in seq(0.05, 0.5, 0.1)) {
             step_042_simulate_data(project, alpha, beta, perturbed_genes, prepared_dir, lfc=TRUE)
@@ -104,7 +113,8 @@ run_simulated_pipeline <- function() {
 
 
     # nems
-    step_050_nems(project, aligner, diffexp_method, prep_method, nem_method, nem_method_compat, prepared_dir, nems_dir, egenes_dir, benchmark_file, report_attached_egenes)
+    nem_method <- "greedy"
+    step_050_nems(project, aligner, diffexp_method, prep_method, nem_method, nem_method_compat, prepared_dir, nems_dir, egenes_dir, benchmark_file, report_attached_egenes, perturbed_genes)
 
     # run HIS matlab code here
     r <- readline(prompt="Run HIS matlab code in matlab now and press enter ")
@@ -112,6 +122,8 @@ run_simulated_pipeline <- function() {
     # read in matlab output and save as an R object so we can generate network comparison plots
     step_051_his(project, "his", perturbed_genes, prepared_dir, nems_dir)
 
+    prep_method <- "lfc.0.05"
+    step_070_plot(prep_method, project, nems_dir, plots_dir, draw_nets_max_nodes, draw_nets_max_count)
 
 }
 
