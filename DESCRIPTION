@@ -23,13 +23,11 @@ Imports:
     fgsea,
     ggplot2,
     nem,
-    snow,
     bnem,
     CellNOptR,
     lem,
     mnem,
     utils,
-    parallel,
     RColorBrewer
 
 
