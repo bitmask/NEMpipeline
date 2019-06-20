@@ -169,7 +169,7 @@ run_nems <- function(nem_method, expr_data, prepared_dir, nems_dir, egenes_dir, 
             return(ret_list)
         }
     } else if (nem_method == "pcnem") {
-        if (requireNamespace("pcnem") {
+        if (requireNamespace("pcnem")) {
             nem_method <- "AdaSimAnneal"
             type <- "mLL"
             control <- pcnem::set.default.parameters(selected.genes, type="mLL", pcombi=TRUE, trans.close=FALSE)
