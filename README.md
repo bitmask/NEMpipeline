@@ -1,10 +1,13 @@
-==NEM Pipeline
+==NEM Pipeline==
 
 To generate simulated data with false positive and false negative rates as specified, run methods, and plot results.  Results will be written into the directory specified.
 
-=== Installation
+=== Installation===
 
-
+```
+devtools::install_github("bitmask/labnetmet")
+devtools::install_github("bitmask/NEMpipeline")
+```
 
 
 Optional dependencies:
@@ -17,6 +20,7 @@ fgnem: https://sysbio.soe.ucsc.edu/projects/fgnem/
 
 
 ```
+library(NEMpipeline)
 set.seed(42)
 alpha <- 0.15
 beta <- 0.05

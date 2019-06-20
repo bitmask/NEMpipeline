@@ -62,7 +62,12 @@ step_070_plot <- function(prep_method, project, nems_dir, plots_dir, draw_nets_m
             draw_networks <- FALSE
         }
         # TODO name this better
-        output_pdf <- file.path(plots_dir, paste(paste("bootstrapgraphs_", prep_method, "_", bootstrap_threshold*100, sep=""), project, "pdf", sep="."))
-        labnetmet::plot_dist(trimmed_graphs, labnetmet::trans_dist, output_pdf, draw_networks=draw_networks)
+        if (requireNamespace("labnetmet")) {
+            output_pdf <- file.path(plots_dir, paste(paste("bootstrapgraphs_", prep_method, "_", bootstrap_threshold*100, sep=""), project, "pdf", sep="."))
+            labnetmet::plot_dist(trimmed_graphs, labnetmet::trans_dist, output_pdf, draw_networks=draw_networks)
+        } else {
+            print("To print the graphs")
+            print("devtools::install_github('bitmask/labnetmet')")
+        }
     }
 }
