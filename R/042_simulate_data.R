@@ -35,7 +35,7 @@ step_042_simulate_data <- function(project, alpha, beta, perturbed_genes, prepar
 make_lfc <- function(generated_data) {
     # convert binary data to lfc 
     
-    len <- 2 * nrow(generated_data) * ncol(generated_data)
+    len <- 3 * nrow(generated_data) * ncol(generated_data)
 
     d <- rnorm(len, mean=0, sd=1)
     effects <- d[d > 0.5 | d< -0.5]
