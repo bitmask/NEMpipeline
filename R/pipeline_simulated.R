@@ -2,7 +2,7 @@
 # execute the analysis pipeline for the simulated data
 # each step will write intermediate output files to disk
 
-run_simulated_pipeline <- function() {
+run_simulated_pipeline <- function(alpha, beta, base_output_dir) {
 
     ################################################################################
     #
@@ -13,22 +13,20 @@ run_simulated_pipeline <- function() {
     project <- "simulated"
 
     # file locations
-    base_input_dir <- "~/NEMpipelineBAM"
 
     # output locations
-    base_output_dir <- "~/NEMpipelineoutput"
-    source_dir <- file.path(base_output_dir, "000_source")
-    lfc_dir <- file.path(base_output_dir, "010_lfc")
+    #source_dir <- file.path(base_output_dir, "000_source")
+    #lfc_dir <- file.path(base_output_dir, "010_lfc")
     diffexp_dir <- file.path(base_output_dir, "030_diffexp")
     #e2_regulon_dir <- file.path(base_output_dir, "039_e2_regulon")
     prepared_dir <- file.path(base_output_dir, "040_prepared")
     heatmap_dir <- file.path(base_output_dir, "045_heatmap")
     nems_dir <- file.path(base_output_dir, "050_nems")
-    consensus_dir <- file.path(base_output_dir, "060_consensus")
+    #consensus_dir <- file.path(base_output_dir, "060_consensus")
     plots_dir <- file.path(base_output_dir, "070_plots")
-    benchmark_dir <- file.path(base_output_dir, "075_benchmark")
-    egenes_dir <- file.path(base_output_dir, "080_egenes")
-    peaks_dir <- file.path(base_output_dir, "090_chip")
+    #benchmark_dir <- file.path(base_output_dir, "075_benchmark")
+    #egenes_dir <- file.path(base_output_dir, "080_egenes")
+    #peaks_dir <- file.path(base_output_dir, "090_chip")
 
     # and ensure they exist
     for (output_dir in c(base_output_dir, lfc_dir, diffexp_dir, prepared_dir, heatmap_dir, nems_dir, consensus_dir, plots_dir, benchmark_dir, egenes_dir, peaks_dir)) {
@@ -102,13 +100,7 @@ run_simulated_pipeline <- function() {
     
     perturbed_genes <- letters[1:7]
 
-    step_042_simulate_data(project, 0, 0, perturbed_genes, prepared_dir, lfc=TRUE)
-    for (alpha in seq(0.05, 0.5, 0.1)) {
-        for (beta in seq(0.05, 0.5, 0.1)) {
-            step_042_simulate_data(project, alpha, beta, perturbed_genes, prepared_dir, lfc=TRUE)
-        }
-    }
-
+    step_042_simulate_data(project, alpha, beta, perturbed_genes, prepared_dir, lfc=TRUE)
 
 
     # nems
@@ -121,7 +113,7 @@ run_simulated_pipeline <- function() {
     # read in matlab output and save as an R object so we can generate network comparison plots
     step_051_his(project, "his", perturbed_genes, prepared_dir, nems_dir)
 
-    prep_method <- "lfc.0.05"
+    prep_method <- paste("lfc", paste(alpha, beta, sep="_"), sep=".")
     step_070_plot(prep_method, project, nems_dir, plots_dir, draw_nets_max_nodes, draw_nets_max_count)
 
 }
