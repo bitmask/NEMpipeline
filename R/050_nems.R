@@ -32,159 +32,175 @@ run_nems <- function(nem_method, expr_data, prepared_dir, nems_dir, egenes_dir, 
     print("starting running nems\n")
     start_time <- Sys.time()
     if (nem_method == "bnem") {
-        # requires data prepared by nem_method boolean
-        #library(bnem)
-        #library(CellNOptR)
+        if (requireNamespace("bnem")) {
+            # requires data prepared by nem_method boolean
+            NEMlist <- list()
+            NEMlist$exprs <- NULL
+            NEMlist$fc <- expr_data
 
-        NEMlist <- list()
-        NEMlist$exprs <- NULL
-        NEMlist$fc <- expr_data
+            if (project == "fly") {
+                stimuli <- c("LPS")
+            } else {
+                stimuli <- c("Ctrl")
+            }
+            inhibitors <- selected.genes
+            CNOlist <- CellNOptR::dummyCNOlist(stimuli = stimuli, inhibitors = inhibitors, maxStim = 2, maxInhibit = 1)
 
-        if (project == "fly") {
-            stimuli <- c("LPS")
+            Sgenes <- c(stimuli, inhibitors)
+
+            sifMatrix <- numeric()
+            for (i in Sgenes) {
+              for (j in Sgenes) {
+                if (i %in% j) { next() }
+                sifMatrix <- rbind(sifMatrix, c(i, 1, j))
+                sifMatrix <- rbind(sifMatrix, c(i, -1, j)) # if you want negative edges
+              }
+            }
+            write.table(sifMatrix, file = file.path(nems_dir, "temp.sif"), sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+            PKN <- readSIF(file.path(nems_dir, "temp.sif"))
+
+            model <- bnem::preprocessing(CNOlist, PKN, maxInputsPerGate=1)
+
+            initBstring <- rep(0, length(model$reacID)) # start with the empty network
+            parallel <- 8
+            output_file_name <- paste(nem_method, input_file_name, "pdf", sep=".")
+            print(output_file_name)
+            pdf(output_file_name)
+            locRun <- bnem::localSearch(
+                CNOlist=CNOlist,
+                NEMlist=NEMlist,
+                model=model,
+                parallel=parallel,
+                initSeed=initBstring,
+                draw = TRUE # FALSE does not draw the network evolution and can be faster
+            )
+            dev.off()
+            resString <- locRun$bStrings[1, ]
+            end_time <- Sys.time()
+            print("Warning: output not written to file")
+            return(locRun)
+
         } else {
-            stimuli <- c("Ctrl")
+            print("To install bnem:")
+            print("devtools::install_github('MartinFXP/B-NEM')")
         }
-        inhibitors <- selected.genes
-        CNOlist <- CellNOptR::dummyCNOlist(stimuli = stimuli, inhibitors = inhibitors, maxStim = 2, maxInhibit = 1)
-
-        Sgenes <- c(stimuli, inhibitors)
-
-        sifMatrix <- numeric()
-        for (i in Sgenes) {
-          for (j in Sgenes) {
-            if (i %in% j) { next() }
-            sifMatrix <- rbind(sifMatrix, c(i, 1, j))
-            sifMatrix <- rbind(sifMatrix, c(i, -1, j)) # if you want negative edges
-          }
-        }
-        write.table(sifMatrix, file = file.path(nems_dir, "temp.sif"), sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
-        PKN <- readSIF(file.path(nems_dir, "temp.sif"))
-
-        model <- bnem::preprocessing(CNOlist, PKN, maxInputsPerGate=1)
-
-        initBstring <- rep(0, length(model$reacID)) # start with the empty network
-        parallel <- 8
-        output_file_name <- paste(nem_method, input_file_name, "pdf", sep=".")
-        print(output_file_name)
-        pdf(output_file_name)
-        locRun <- bnem::localSearch(
-            CNOlist=CNOlist,
-            NEMlist=NEMlist,
-            model=model,
-            parallel=parallel,
-            initSeed=initBstring,
-            draw = TRUE # FALSE does not draw the network evolution and can be faster
-        )
-        dev.off()
-        resString <- locRun$bStrings[1, ]
-        end_time <- Sys.time()
-        print("Warning: output not written to file")
-        return(locRun)
-
-        #return(bnem(search = "greedy", fc = expr_data, inhibitors="Ctrl", stimuli = selected.genes, signals = selected.genes,  parallel = 8, verbose = TRUE,  maxSteps = Inf))
     } else if (nem_method == "lem") {
-        print("nem_method: lem")
-        #library(lem)
-        if (project == "ps") {
-            bin_exp_mat <- readRDS(file.path(prepared_dir, paste("bin_exp_mat", project, "Rds", sep=".")))
-        } else {
-            bin_exp_mat <- diag(length(selected.genes))
-        }
+        if (requireNamespace("lem")) {
+            print("nem_method: lem")
+            if (project == "ps") {
+                bin_exp_mat <- readRDS(file.path(prepared_dir, paste("bin_exp_mat", project, "Rds", sep=".")))
+            } else {
+                bin_exp_mat <- diag(length(selected.genes))
+            }
 
-        nocontrols <- FALSE
-        if (nocontrols) {
-            bin_exp_mat <- bin_exp_mat[,5:14]
-        }
+            nocontrols <- FALSE
+            if (nocontrols) {
+                bin_exp_mat <- bin_exp_mat[,5:14]
+            }
 
-        # ensure that the matricies can be multiplied
-        common <- intersect(rownames(bin_exp_mat), colnames(expr_data))
-        bin_exp_mat <- bin_exp_mat[common,]
-        expr_data <- expr_data[,common]
-        lem_result <- lem::lem(t(as.matrix(expr_data)), as.matrix(bin_exp_mat), inference="greedy", parameter.estimation="linear.reg", verbose=TRUE)
+            # ensure that the matricies can be multiplied
+            common <- intersect(rownames(bin_exp_mat), colnames(expr_data))
+            bin_exp_mat <- bin_exp_mat[common,]
+            expr_data <- expr_data[,common]
+            lem_result <- lem::lem(t(as.matrix(expr_data)), as.matrix(bin_exp_mat), inference="greedy", parameter.estimation="linear.reg", verbose=TRUE)
 
-        # extract which sgenes control which egenes (many:many)
-        beta <- t(lem_string$beta)
-        rownames(beta) <- rownames(expr_data)
-        #table(apply(beta, 1, function(x) {order(x)})[9,])
-        beta[beta < 0] <- 0
-        n <- list()
-        for (r in 1:nrow(beta)) {
-            row <- beta[r,]
-            ord <- row[rev(order(row))]
-            egene <- rownames(beta)[r]
-            n[[egene]] <- ord[ord > 0]
-        }
-        # write the egene attachments before we lose data in changing the format
-        # TODO: HACK this violates the one script one output dir paradigm
-        output_file_name <- paste("egenes", nem_method, project, "Rds", sep=".")
-        sink(file.path(egenes_dir, output_file_name))
-        print(n)
-        sink()
+            # extract which sgenes control which egenes (many:many)
+            beta <- t(lem_string$beta)
+            rownames(beta) <- rownames(expr_data)
+            #table(apply(beta, 1, function(x) {order(x)})[9,])
+            beta[beta < 0] <- 0
+            n <- list()
+            for (r in 1:nrow(beta)) {
+                row <- beta[r,]
+                ord <- row[rev(order(row))]
+                egene <- rownames(beta)[r]
+                n[[egene]] <- ord[ord > 0]
+            }
+            # write the egene attachments before we lose data in changing the format
+            # TODO: HACK this violates the one script one output dir paradigm
+            output_file_name <- paste("egenes", nem_method, project, "Rds", sep=".")
+            sink(file.path(egenes_dir, output_file_name))
+            print(n)
+            sink()
 
-        # format these results the same as the results from the nem package
-        r <- list()
-        r$graph <- l$graph
-        # note: an E-gene can be attached to multiple S-genes (linear effects model...)
-        mappos <- list()
-        sgene_idx <- 1
-        for (sg in colnames(expr_data)) {
-            attached_genes <- rownames(expr_data)[which(l$beta[sgene_idx,]>0)]
-            mappos[[sg]] <- attached_genes
-            sgene_idx <- sgene_idx + 1
-        }
-        r$mappos <- mappos
-        return(r)
-    } else if (nem_method == "mnem") {
-        library(mnem)
-        k <- 3
-        result <- mnem::mnem(expr_data, k = k, starts = 10, search="greedy") # could do this with nem_method="disc" for discrete data
-        ret_list <- list()
-        for (k_idx in 1:k) {
             # format these results the same as the results from the nem package
             r <- list()
-            sgenes <- colnames(result$data)
-            egenes <- rownames(result$data)
-            r$graph <- result$comp[[1]]$phi
-            colnames(r$graph) <- unique(sgenes)
-            rownames(r$graph) <- unique(sgenes)
-            attachments <- result$comp[[1]]$theta
+            r$graph <- l$graph
+            # note: an E-gene can be attached to multiple S-genes (linear effects model...)
             mappos <- list()
             sgene_idx <- 1
-            for (sg in sgenes) {
-                attached_egenes <- egenes[which(attachments == sgene_idx)]
-                mappos[[sg]] <- attached_egenes
+            for (sg in colnames(expr_data)) {
+                attached_genes <- rownames(expr_data)[which(l$beta[sgene_idx,]>0)]
+                mappos[[sg]] <- attached_genes
                 sgene_idx <- sgene_idx + 1
             }
             r$mappos <- mappos
-            ret_list[[k_idx]] <- r
-            # TODO? return weighted probabilities to be incorporated into the file name
-            # TODO: guarantee that all egenes are in $mappos
+            return(r)
+        } else {
+            print("To install lem:")
+            print("install.packages('https://www.mimuw.edu.pl/~szczurek/lem/lem_1.0.tar.gz',repos=NULL, type='source')")
         }
-        return(ret_list)
+    } else if (nem_method == "mnem") {
+        if (requireNamespace("mnem")) {
+            k <- 3
+            result <- mnem::mnem(expr_data, k = k, starts = 10, search="greedy") # could do this with nem_method="disc" for discrete data
+            ret_list <- list()
+            for (k_idx in 1:k) {
+                # format these results the same as the results from the nem package
+                r <- list()
+                sgenes <- colnames(result$data)
+                egenes <- rownames(result$data)
+                r$graph <- result$comp[[1]]$phi
+                colnames(r$graph) <- unique(sgenes)
+                rownames(r$graph) <- unique(sgenes)
+                attachments <- result$comp[[1]]$theta
+                mappos <- list()
+                sgene_idx <- 1
+                for (sg in sgenes) {
+                    attached_egenes <- egenes[which(attachments == sgene_idx)]
+                    mappos[[sg]] <- attached_egenes
+                    sgene_idx <- sgene_idx + 1
+                }
+                r$mappos <- mappos
+                ret_list[[k_idx]] <- r
+                # TODO? return weighted probabilities to be incorporated into the file name
+                # TODO: guarantee that all egenes are in $mappos
+            }
+            return(ret_list)
+        }
     } else if (nem_method == "pcnem") {
-        nem_method <- "AdaSimAnneal"
-        type <- "mLL"
-        control <- pcnem::set.default.parameters(selected.genes, type="mLL", pcombi=TRUE, trans.close=FALSE)
-        control$map <- as.matrix(filtered) # works with binary data??
-        b <- pcnem::nem(as.matrix(filtered), inference=nem_method, control=control, verbose=TRUE)
+        if (requireNamespace("pcnem") {
+            nem_method <- "AdaSimAnneal"
+            type <- "mLL"
+            control <- pcnem::set.default.parameters(selected.genes, type="mLL", pcombi=TRUE, trans.close=FALSE)
+            control$map <- as.matrix(filtered) # works with binary data??
+            b <- pcnem::nem(as.matrix(filtered), inference=nem_method, control=control, verbose=TRUE)
+        } else {
+            print("To install pcnem:")
+            print("devtools::install_github('cbg-ethz/pcNEM')")
+        }
     } else if (nem_method == "depn") {
         #not run
         data(SahinRNAi2008)
         control = set.default.parameters(setdiff(colnames(dat.normalized),"time"), map=map.int2node, type="depn",debug=FALSE) # set mapping of interventions to perturbed nodes
         net = nem(dat.normalized, control=control) # greedy hillclimber to find most probable network structure
     } else if (nem_method == "fgnem") {
-        # now comes from prepared
-        if (project == "fly") {
-            input_file_name <- file.path(prepared_dir, paste(prep_method, project, "tsv", sep="."))
+        if (requireNamespace("fgnem")) {
+            # now comes from prepared
+            if (project == "fly") {
+                input_file_name <- file.path(prepared_dir, paste(prep_method, project, "tsv", sep="."))
+            } else {
+                input_file_name <- file.path(prepared_dir, paste(prep_method, diffexp_method, aligner, project, "Rds", sep="."))
+            }
+            eg <- read.egene.tab(input_file_name)
+            paramMean <- RCommandArgDouble("MEAN", default=1.5, gt=0, errorMsg=usage)
+            paramSD <- RCommandArgDouble("SD", default=1, gt=0)
+            params <- paramGen(paramMean, paramSD)
+            results <- scoreBestModelEstimate(eg, params=params, doTransitivity=FALSE, summarization=marginop)
         } else {
-            input_file_name <- file.path(prepared_dir, paste(prep_method, diffexp_method, aligner, project, "Rds", sep="."))
+            print("To install fgnem:")
+            print("Follow instructions at https://sysbio.soe.ucsc.edu/projects/fgnem/")
         }
-        eg <- read.egene.tab(input_file_name)
-        paramMean <- RCommandArgDouble("MEAN", default=1.5, gt=0, errorMsg=usage)
-        paramSD <- RCommandArgDouble("SD", default=1, gt=0)
-        params <- paramGen(paramMean, paramSD)
-        results <- scoreBestModelEstimate(eg, params=params, doTransitivity=FALSE, summarization=marginop)
     } else {
         contr <- c(0.15,0.05)
         if (nem_method %in% unique(c(nem_method_compat[['binary']], "search", "nem.greedy", "triples", "pairwise", "ModuleNetwork", "ModuleNetwork.orig"))) {

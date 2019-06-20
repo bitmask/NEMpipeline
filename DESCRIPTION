@@ -23,12 +23,13 @@ Imports:
     fgsea,
     ggplot2,
     nem,
-    bnem,
     CellNOptR,
-    lem,
-    mnem,
     utils,
     RColorBrewer
+Suggests:
+    bnem,
+    lem,
+    mnem
 
 
 License: MIT + file LICENSE

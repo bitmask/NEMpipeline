@@ -16,7 +16,7 @@ run_simulated_pipeline <- function(alpha, beta, base_output_dir) {
 
     # output locations
     #source_dir <- file.path(base_output_dir, "000_source")
-    #lfc_dir <- file.path(base_output_dir, "010_lfc")
+    lfc_dir <- file.path(base_output_dir, "010_lfc")
     diffexp_dir <- file.path(base_output_dir, "030_diffexp")
     #e2_regulon_dir <- file.path(base_output_dir, "039_e2_regulon")
     prepared_dir <- file.path(base_output_dir, "040_prepared")
@@ -29,7 +29,7 @@ run_simulated_pipeline <- function(alpha, beta, base_output_dir) {
     #peaks_dir <- file.path(base_output_dir, "090_chip")
 
     # and ensure they exist
-    for (output_dir in c(base_output_dir, lfc_dir, diffexp_dir, prepared_dir, heatmap_dir, nems_dir, consensus_dir, plots_dir, benchmark_dir, egenes_dir, peaks_dir)) {
+    for (output_dir in c(base_output_dir, lfc_dir, diffexp_dir, prepared_dir, heatmap_dir, nems_dir, plots_dir)) {
         if( ! dir.exists(output_dir)) {
             dir.create(output_dir)
         }
