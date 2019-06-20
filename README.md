@@ -17,9 +17,9 @@ fgnem: https://sysbio.soe.ucsc.edu/projects/fgnem/
 
 
 ```
-> set.seed(42)
-> alpha <- 0.15
-> beta <- 0.05
-> output_dir <- "~/projects/NEMpipelineoutput"
-> run_simulated_pipeline(alpha, beta, output_dir)
+set.seed(42)
+alpha <- 0.15
+beta <- 0.05
+output_dir <- "~/projects/NEMpipelineoutput"
+run_simulated_pipeline(alpha, beta, output_dir)
 ```

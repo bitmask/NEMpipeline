@@ -80,7 +80,6 @@ run_simulated_pipeline <- function(alpha, beta, base_output_dir) {
                          "sc" = c("lem")
                          )
 
-    nem_method <- "triples"
 
     report_attached_egenes <- FALSE
 
@@ -104,11 +103,13 @@ run_simulated_pipeline <- function(alpha, beta, base_output_dir) {
 
 
     # nems
+    nem_method <- "triples"
+    step_050_nems(project, aligner, diffexp_method, prep_method, nem_method, nem_method_compat, prepared_dir, nems_dir, egenes_dir, benchmark_file, report_attached_egenes, perturbed_genes)
     nem_method <- "nem.greedy"
     step_050_nems(project, aligner, diffexp_method, prep_method, nem_method, nem_method_compat, prepared_dir, nems_dir, egenes_dir, benchmark_file, report_attached_egenes, perturbed_genes)
 
     # run HIS matlab code here
-    r <- readline(prompt="Run HIS matlab code in matlab now and press enter ")
+    r <- readline(prompt="Run HIS matlab code in matlab now and press enter, or to skip press enter")
 
     # read in matlab output and save as an R object so we can generate network comparison plots
     step_051_his(project, "his", perturbed_genes, prepared_dir, nems_dir)
