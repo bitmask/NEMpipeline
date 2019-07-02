@@ -76,8 +76,8 @@ set_fn_rate <- function(generated_data, beta) {
 
 make_data <- function(m) {
     data_cols <- nrow(m)
-    data_rows <- 10*data_cols
-    reporter_names <- make.unique(rep(colnames(m), each=10))
+    data_rows <- 11*data_cols
+    reporter_names <- make.unique(c(colnames(m), rep(colnames(m), each=10)))
     generated_data <- as.data.frame(matrix(0, nrow=data_rows, ncol=data_cols))
     colnames(generated_data) <- colnames(m)
     rownames(generated_data) <- reporter_names
@@ -87,6 +87,7 @@ make_data <- function(m) {
         complexes[[node_idx]] <- walk_tree(node_idx, m)
     }
 
+    # assign values to the reporter genes
     for (path in unlist(complexes)) {
         affected <- c()
         path_array <- strsplit(path, "_")[[1]]
@@ -95,11 +96,22 @@ make_data <- function(m) {
             affected <- c(affected, node_name)
             # paths climb up tree -- genes at top of path are affected by those underneath
             for (a in affected) {
-                rows <- grep(node_name, reporter_names)  # XXX only works with 26 nodes or fewer and no underscores in names
+                rows <- grep(paste(node_name, ".", sep=""), reporter_names)  # XXX only works with 26 nodes or fewer and no underscores in names
                 generated_data[rows,a] <- 1
             }
         }
     }
+    
+    # assign values to the s-genes as reporters
+    sgenes <- colnames(generated_data)
+    for (sgene in sgenes) {
+        generated_data[sgene, sgene] <- 1
+    }
+
+    # format of this object is perturbations in columns, reporters in rows
+    # rows with same name as columns are looking at whether the knockdown is successful
+    # n.# rownames are the egenes attached to the respective sgene
+
     return(generated_data)
 }
 

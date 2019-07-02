@@ -114,6 +114,8 @@ run_simulated_pipeline <- function(alpha, beta, base_output_dir) {
     # read in matlab output and save as an R object so we can generate network comparison plots
     step_051_his(project, "his", perturbed_genes, prepared_dir, nems_dir)
 
+    step_052_correlation(project, perturbed_genes, prepared_dir, nems_dir)
+
     prep_method <- paste("lfc", paste(alpha, beta, sep="_"), sep=".")
     step_070_plot(prep_method, project, nems_dir, plots_dir, draw_nets_max_nodes, draw_nets_max_count)
 
