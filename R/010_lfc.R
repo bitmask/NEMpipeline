@@ -6,7 +6,7 @@
 
 #' Compute log fold change from bam files
 #'
-#' Output of this function is also stored in data/hisat2.er.rda
+#' Output of this function is also stored in data/hisat2.project.rda
 #'
 #' @param project
 #' @param aligner
@@ -19,14 +19,15 @@ step_010_lfc <- function(project, aligner, experiment_definitions, base_input_di
     # set up the input/output locations
 
     # loading bam.files
-    filenames <- as.character(experiment_definitions$Bam.File)
-    filenames <- paste(base_input_dir, filenames, sep="/")
+    #filenames <- as.character(experiment_definitions$Bam.File)
+    #filenames <- paste(base_input_dir, filenames, sep="/")
+    filenames <- read.csv("../data/E2V2_experiments_definitions.csv")[5]
     if (all(file.exists(filenames))) {
         bamfiles <- Rsamtools::BamFileList(filenames)
         seqinfo(bamfiles[1])
               
         # counting reads
-        ER_lfc <- Rsubread::featureCounts(filenames,annot.inbuilt="hg38",isPairedEnd=TRUE)
+        ER_lfc <- Rsubread::featureCounts(filenames,annot.inbuilt="hg38",isPairedEnd=FALSE)
 
         # store data if we have regenerated it
         #usethis::use_data(ER_lfc) # store in package
