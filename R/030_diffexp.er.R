@@ -9,11 +9,11 @@ preprocess <- function(fc, experiment_definitions, expr.cutoff, samples) {
     x <- edgeR::DGEList(counts=fc$counts, genes=fc$annotation[,c("GeneID","Length")])
 
     id <- as.character(experiment_definitions$Bam.File)  
-    id <- vapply(strsplit(id,"/"),"[",3, FUN.VALUE=character(1))
+    id <- vapply(strsplit(id,"/"),"[",4, FUN.VALUE=character(1))
     id <- vapply(strsplit(id,"-"),"[",2, FUN.VALUE=character(1))
 
     names <- grep(paste(id,collapse = "|"),colnames(x$counts),value = T)
-    stopifnot(all.equal(names,colnames(x$counts)[1:70])) # here something could potentially go wrong 
+    stopifnot(all.equal(names,colnames(x$counts)[1:628])) # here something could potentially go wrong 
     x$counts <- x$counts[,which(colnames(x$counts) %in% names)]
     x$samples <- x$samples[which(rownames(x$samples) %in% names),]
 
@@ -27,25 +27,25 @@ preprocess <- function(fc, experiment_definitions, expr.cutoff, samples) {
     rownames(x$counts) <- annotate::lookUp(rownames(x$counts), 'org.Hs.eg', 'SYMBOL')       
     
     # rename colnames(x$counts)
-    samples_all <- paste(experiment_definitions$Gene,experiment_definitions$shRNA,experiment_definitions$Biological.Rep)
+    samples_all <- paste(experiment_definitions$Pool, experiment_definitions$Cell.Line, experiment_definitions$Gene, experiment_definitions$shRNA, experiment_definitions$Biological.Rep)
     # don't overwrite samples from config
     colnames(x$counts) <- samples_all
   
     # print dimensions of the raw counts matrix
     #print("Dimensions of the raw counts matrix:")
-    dim(x)
+    #dim(x)
     #print("Range of absolute unnormalized expression values [cpm]: ")
-    range(edgeR::cpm(x$counts))
+    #range(edgeR::cpm(x$counts))
     
     # filter out genes that don't vary by more than expr.cutoff in more than 2 experiments
     keep <- rowSums(edgeR::cpm(x) > expr.cutoff) >= 2
     x <- x[keep, , keep.lib.sizes=FALSE]
 
     # filtering out strange one "RARA 8C B" 
-    get.rid.off <- c("RARA 8C B")
-    x <- x[,-which(colnames(x$counts) %in% get.rid.off), keep.lib.sizes=TRUE]
+    #get.rid.off <- c("RARA 8C B")
+    #x <- x[,-which(colnames(x$counts) %in% get.rid.off), keep.lib.sizes=TRUE]
 
-    controls <- grep("POS.CONTROL",colnames(x$counts),value = T)
+    controls <- grep("CTRL",colnames(x$counts),value = T)
     index <- colnames(x$counts[,order(colnames(x$counts))])[-which(colnames(x$counts) %in% controls)]
 
     index <- c(controls,samples)
@@ -145,11 +145,11 @@ reformat <- function(sel, controls) {
 }
 
 process_with_deseq <- function(counts, condition, selected.genes) {
-    coldata <- data.frame(row.names=colnames(counts), condition)
+    #coldata <- data.frame(row.names=colnames(counts), condition)
         
     # actual DESeq2 analysis
-    dds <- DESeq2::DESeqDataSetFromMatrix(countData=counts, 
-                                  colData=coldata, 
+    dds <- DESeq2::DESeqDataSet(countData=counts, 
+                                  #colData=coldata, 
                                   design=~condition
                                   )
     
@@ -160,6 +160,8 @@ process_with_deseq <- function(counts, condition, selected.genes) {
     # DGE analysis
     dds <- DESeq2::DESeq(dds)
 
+    return(dds)
+
     # to make pairwise comparisons
     # has to be done by looping 
     # over the contrasts (pairwise)
@@ -167,7 +169,7 @@ process_with_deseq <- function(counts, condition, selected.genes) {
     for(i in 1:length(selected.genes)){
     res.list[[i]] <- DESeq2::results(dds, 
                              alpha = 0.05, # alpha refers to FDR cutoff
-                             contrast = c("condition","POS.CONTROL",paste0(selected.genes[i]))
+                             contrast = c("condition","CTRL",paste0(selected.genes[i]))
                               ) 
                                }
     names(res.list) <- selected.genes
@@ -175,7 +177,7 @@ process_with_deseq <- function(counts, condition, selected.genes) {
     shrink.list <- list()
     for(i in 1:length(selected.genes)){  
         shrink.list[[i]] <- DESeq2::lfcShrink(dds, 
-                                  contrast = c("condition","POS.CONTROL",paste0(selected.genes[i])),
+                                  contrast = c("condition","CTRL",paste0(selected.genes[i])),
                                   res = res.list[[i]] # this is important, because otherwise the settings above will be neglected - e.g. the p.adjust <0.05 setting
                                   )
                                }
@@ -203,9 +205,6 @@ sgene_heatmap <- function(diffexp, diffexp_method, input_file_name, selected.gen
 
 step_030_diffexp <- function(project, aligner, diffexp_method, lfc_dir, diffexp_dir, experiment_definitions, expr.cutoff, samples, selected.genes) {
     print("030_diffexp")
-    print("selected genes")
-    print(selected.genes)
-    print("selected genes")
     input_file_name <- paste(aligner, project, "Rds", sep=".")
     fc <- readRDS(file.path(lfc_dir, input_file_name))
     foo <- preprocess(fc, experiment_definitions, expr.cutoff, samples)
@@ -214,13 +213,17 @@ step_030_diffexp <- function(project, aligner, diffexp_method, lfc_dir, diffexp_
     #nsel <- normalize_counts(sel)
     nsel <- sel
 
-    l <- reformat(nsel, controls)
-    counts <- l[[1]]
-    condition <- l[[2]]
+    # for multifactor design, pass dataframe as condition
+
+    design <- experiment_definitions[,c(1,6,7,8)]
+
+    #l <- reformat(nsel, controls)
+    #counts <- l[[1]]
+    #condition <- l[[2]]
     if (diffexp_method == "DESeq") {
-        diffexp <- process_with_deseq(counts, condition, selected.genes)
+        diffexp <- process_with_deseq(counts, design, selected.genes)
     } else if (diffexp_method == "edgeR") {
-        diffexp <- process_with_edger(sel, controls, selected.genes)
+        #diffexp <- process_with_edger(sel, controls, selected.genes)
     }
     output_file_name <- paste(diffexp_method, input_file_name, sep=".")
     saveRDS(diffexp, file.path(diffexp_dir, output_file_name))

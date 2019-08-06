@@ -19,9 +19,8 @@ step_010_lfc <- function(project, aligner, experiment_definitions, base_input_di
     # set up the input/output locations
 
     # loading bam.files
-    #filenames <- as.character(experiment_definitions$Bam.File)
-    #filenames <- paste(base_input_dir, filenames, sep="/")
-    filenames <- read.csv("../data/E2V2_experiments_definitions.csv")[5]
+    filenames <- as.character(experiment_definitions$Bam.File)
+    filenames <- paste(base_input_dir, filenames, sep="/")
     if (all(file.exists(filenames))) {
         bamfiles <- Rsamtools::BamFileList(filenames)
         seqinfo(bamfiles[1])
