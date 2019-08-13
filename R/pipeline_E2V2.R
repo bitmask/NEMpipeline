@@ -18,7 +18,7 @@ run_E2V2_pipeline <- function() {
     base_input_dir <- "~/projects/E2V2"
 
     # output locations
-    base_output_dir <- "~/projects/NEMpipelineoutput"
+    base_output_dir <- "~/projects/NEMpipelineE2V2output"
     source_dir <- file.path(base_output_dir, "000_source")
     lfc_dir <- file.path(base_output_dir, "010_lfc")
     diffexp_dir <- file.path(base_output_dir, "030_diffexp")
@@ -113,9 +113,9 @@ run_E2V2_pipeline <- function() {
     # successful screens
     samples <- experiment_definitions$Sample.name
     # remove controls
-    remove <- which(startsWith("CTRL", samples))
+    remove <- which(startsWith(as.character(samples),"CTRL"))
     samples <- samples[-remove]
-    selected.genes <- unique(vapply(strsplit(samples,"_"),"[",1, FUN.VALUE=character(1)))
+    selected.genes <- unique(vapply(strsplit(as.character(samples),"_"),"[",1, FUN.VALUE=character(1)))
 
 
 
