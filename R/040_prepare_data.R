@@ -166,7 +166,7 @@ bootstrap <- function(shrink.list, adjusted_pvalue_cutoff, regulon) {
 }
 
 random <- function(shrink.list) {
-    # generate random data to compare the bootstraps against
+    # generate random expression data to compare the e-gene bootstraps against
     # then draw bootstraps from the randomly generated data
     rando <- sample(c(0,1), 1042*10, replace=TRUE) # TODO make size dynamic based on size of shrink.list after filtering, so that we get the right number
     rando <- matrix(rando, nrow=1042, ncol=10)
@@ -181,6 +181,21 @@ random <- function(shrink.list) {
         colnames(sampled) <- selected.genes
         rownames(sampled) <- paste("row", 1:1042, sep="")
         bootstrap_list[[i]] <- sampled
+    }
+    return(bootstrap_list)
+}
+
+nullmodel <- function(shrink.list, adjusted_pvalue_cutoff) {
+
+    DESeq.disc.mat <- binary(shrink.list, adjusted_pvalue_cutoff)
+    sgenes <- colnames(DESeq.disc.mat)
+
+    # permute the labels of the s-genes to generate a null model, compare chip-seq results against this
+    n_bootstrap <- 50
+    bootstrap_list <- list()
+    for (i in 1:n_bootstrap) {
+        bootstrap_list[[i]] <- DESeq.disc.mat[,sample(1:length(sgenes), length(sgenes), replace=FALSE)]
+        colnames(bootstrap_list[[i]]) <- sgenes # relabel the columns
     }
     return(bootstrap_list)
 }
@@ -449,6 +464,12 @@ step_040_prepare_data <- function(project, aligner, diffexp_method, prep_method,
                     saveRDS(clustered, file.path(prepared_dir, output_file_name))
                 }
             }
+            if (prep_method == "means") {
+                prepared <- means(diffexp, adjusted_pvalue_cutoff)
+                filtered <- filter_regulon(prepared, regulon)
+                output_file_name <- paste(prep_method, input_file_name, sep=".")
+                saveRDS(filtered, file.path(prepared_dir, output_file_name))
+            }
             if (prep_method == "lfc") {
                 prepared <- lfc(diffexp, adjusted_pvalue_cutoff)
                 filtered <- filter_regulon(prepared, regulon)
@@ -503,6 +524,16 @@ step_040_prepare_data <- function(project, aligner, diffexp_method, prep_method,
                     acc <- acc + 1
                 }
             }
+            if (prep_method == "nullmodel") {
+                prepared_list <- nullmodel(diffexp, adjusted_pvalue_cutoff)
+                acc <- 1
+                for (i in 1:length(prepared_list)) {
+                    output_file_name <- paste(paste(prep_method, acc, sep="_"), input_file_name, sep=".")
+                    saveRDS(prepared_list[[i]], file.path(prepared_dir, output_file_name))
+                    acc <- acc + 1
+                }
+            }
+
             if (prep_method == "progressive") {
                 # filters
                 prepared_list <- progressive(diffexp, adjusted_pvalue_cutoff)
