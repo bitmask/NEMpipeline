@@ -150,7 +150,7 @@ run_ER_pipeline <- function() {
      #}
 
 
-    step_070_plot(prep_method, project, nems_dir, plots_dir, draw_nets_max_nodes, draw_nets_max_count)
+    step_070_plot(distance_method, prep_method, project, nems_dir, plots_dir, draw_nets_max_nodes, draw_nets_max_count)
 
 
     #step_080_egenes(project, aligner, diffexp_method, prep_method, nem_method, nems_dir, egenes_dir, selected.genes)
