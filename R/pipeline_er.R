@@ -74,7 +74,7 @@ run_ER_pipeline <- function() {
     # geneset - use gsea to group the egenes into genesets to run the nems on
     # cluster_bin - cluster binary expression data to generate ensemble egenes to run nems on
     # nullmodel - permute s-genes and bootstrap
-    prep_method <- "lfc"
+    prep_method <- "binary"
 
     # Which NEM methods should be applied?
     # The way the data is prepared determines which NEM methods are compatible with which prepared data
@@ -123,6 +123,8 @@ run_ER_pipeline <- function() {
     
     report_attached_egenes <- FALSE
 
+    distance_method <- "intersection" #transitive
+
     ################################################################################
     #
     # Pipeline
@@ -140,19 +142,20 @@ run_ER_pipeline <- function() {
     #step_030_diffexp(project, aligner, diffexp_method, lfc_dir, diffexp_dir, ER_experiment_definitions, expr.cutoff, samples, selected.genes)
 
     # prepare data in correct format to use with NEMs
-    step_040_prepare_data(project, aligner, diffexp_method, prep_method, diffexp_dir, prepared_dir, adjusted_pvalue_cutoff, ER_regulon)
+    #step_040_prepare_data(project, aligner, diffexp_method, prep_method, diffexp_dir, prepared_dir, adjusted_pvalue_cutoff, ER_regulon)
 
     # nems
-    step_050_nems(project, aligner, diffexp_method, prep_method, nem_method, nem_method_compat, prepared_dir, nems_dir, egenes_dir, benchmark_file, report_attached_egenes, selected.genes)
+    #step_050_nems(project, aligner, diffexp_method, prep_method, nem_method, nem_method_compat, prepared_dir, nems_dir, egenes_dir, benchmark_file, report_attached_egenes, selected.genes)
 
-    step_080_egenes(project, aligner, diffexp_method, prep_method, nem_method, nems_dir, egenes_dir, selected.genes)
+    step_070_plot(distance_method, prep_method, project, nems_dir, plots_dir, draw_nets_max_nodes, draw_nets_max_count)
 
-    step_090_chip(project, aligner, diffexp_method, prep_method, egenes_dir, peaks_dir, chip_dir, sgenes)
+    #step_080_egenes(project, aligner, diffexp_method, prep_method, nem_method, nems_dir, egenes_dir, selected.genes)
+    #step_090_chip(project, aligner, diffexp_method, prep_method, egenes_dir, peaks_dir, chip_dir, sgenes)
 
 
 
     # run these steps with nullmodel data
-    step_040_prepare_data(project, aligner, diffexp_method, prep_method, diffexp_dir, prepared_dir, adjusted_pvalue_cutoff, ER_regulon)
+    #step_040_prepare_data(project, aligner, diffexp_method, prep_method, diffexp_dir, prepared_dir, adjusted_pvalue_cutoff, ER_regulon)
     #step_050_nems(project, aligner, diffexp_method, prep_method, nem_method, nem_method_compat, prepared_dir, nems_dir, egenes_dir, benchmark_file, report_attached_egenes, selected.genes)
     #step_070_plot(prep_method, project, nems_dir, plots_dir, draw_nets_max_nodes, draw_nets_max_count)
     #step_080_egenes(project, aligner, diffexp_method, prep_method, nem_method, nems_dir, egenes_dir, selected.genes)
