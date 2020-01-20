@@ -67,7 +67,7 @@ step_070_plot <- function(distance_method, prep_method, project, nems_dir, plots
             if (distance_method == "transitive") {
                 labnetmet::plot_dist(trimmed_graphs, labnetmet::trans_dist, output_pdf, draw_networks=draw_networks)
             } else if (distance_method == "intersection") {
-                labnetmet::plot_dist(trimmed_graphs, labnetmet::trans_dist, output_pdf, draw_networks=draw_networks)
+                labnetmet::plot_dist(trimmed_graphs, labnetmet::intersect_dist_list, output_pdf, draw_networks=draw_networks)
             } else {
                 print(paste0("unknown distance method ", distance_method))
             }
