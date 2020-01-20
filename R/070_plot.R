@@ -16,7 +16,7 @@ trim_bootstrap <- function(graphs, bootstrap_threshold=bootstrap_threshold) {
 
 
 
-step_070_plot <- function(prep_method, project, nems_dir, plots_dir, draw_nets_max_nodes, draw_nets_max_count) {
+step_070_plot <- function(distance_method, prep_method, project, nems_dir, plots_dir, draw_nets_max_nodes, draw_nets_max_count) {
     draw_networks <- TRUE
     # compare all the data (at first)
     compare <- list()
@@ -64,7 +64,13 @@ step_070_plot <- function(prep_method, project, nems_dir, plots_dir, draw_nets_m
         # TODO name this better
         if (requireNamespace("labnetmet")) {
             output_pdf <- file.path(plots_dir, paste(paste("bootstrapgraphs_", prep_method, "_", bootstrap_threshold*100, sep=""), project, "pdf", sep="."))
-            labnetmet::plot_dist(trimmed_graphs, labnetmet::trans_dist, output_pdf, draw_networks=draw_networks)
+            if (distance_method == "transitive") {
+                labnetmet::plot_dist(trimmed_graphs, labnetmet::trans_dist, output_pdf, draw_networks=draw_networks)
+            } else if (distance_method == "intersection") {
+                labnetmet::plot_dist(trimmed_graphs, labnetmet::trans_dist, output_pdf, draw_networks=draw_networks)
+            } else {
+                print(paste0("unknown distance method ", distance_method))
+            }
         } else {
             print("To print the graphs")
             print("devtools::install_github('bitmask/labnetmet')")

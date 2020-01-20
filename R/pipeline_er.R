@@ -74,7 +74,7 @@ run_ER_pipeline <- function() {
     # geneset - use gsea to group the egenes into genesets to run the nems on
     # cluster_bin - cluster binary expression data to generate ensemble egenes to run nems on
     # nullmodel - permute s-genes and bootstrap
-    prep_method <- "lfc"
+    prep_method <- "binary"
 
     # Which NEM methods should be applied?
     # The way the data is prepared determines which NEM methods are compatible with which prepared data
@@ -123,7 +123,7 @@ run_ER_pipeline <- function() {
     
     report_attached_egenes <- FALSE
 
-
+    distance_method <- "intersection" #transitive
 
     ################################################################################
     #
