@@ -226,9 +226,17 @@ step_050_nems <- function( project, aligner, diffexp_method, prep_method, nem_me
     # main
     # read all expression data that has been written into data dir, and calculate nems for that, by each method
     timing <- data.frame(input=character(0), nem_method=character(0), seconds=numeric(0), date=character(0), stringsAsFactors=FALSE)
-    matching <- dir(prepared_dir, pattern=project)
+    matching <- dir(prepared_dir, pattern=prep_method)
+    if (diffexp_method != "") {
+        matching <- Filter(function(x) grepl(paste("\\.", diffexp_method, "\\.", sep=""), x), matching)
+    }
+    if (aligner != "") {
+        matching <- Filter(function(x) grepl(paste("\\.", aligner, "\\.", sep=""), x), matching)
+    }
+    matching <- Filter(function(x) grepl(paste("\\.", project, "\\.", sep=""), x), matching)
     matching <- Filter(function(x) grepl(paste("\\.", "Rds", sep=""), x), matching)
     for (input_file_name in matching) {
+        print(paste("input file: ", input_file_name, sep=""))
         #TODO: loading RDS needs to not happen for fgnem
         expr_data <- readRDS(file.path(prepared_dir, input_file_name))
         if (nem_method %in% nem_method_compat[[prep_method]]) {
