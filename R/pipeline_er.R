@@ -12,6 +12,7 @@ run_ER_pipeline <- function() {
 
     # file locations
     base_input_dir <- "~/NEMpipelineBAM"
+    chip_dir <- file.path(base_input_dir, "chip-seq")
 
     # output locations
     base_output_dir <- "~/NEMpipelineoutput"
@@ -72,7 +73,8 @@ run_ER_pipeline <- function() {
     # random - randomly generate data, to compare the bootstraps against
     # geneset - use gsea to group the egenes into genesets to run the nems on
     # cluster_bin - cluster binary expression data to generate ensemble egenes to run nems on
-    prep_method <- "binary"
+    # nullmodel - permute s-genes and bootstrap
+    prep_method <- "lfc"
 
     # Which NEM methods should be applied?
     # The way the data is prepared determines which NEM methods are compatible with which prepared data
@@ -100,10 +102,11 @@ run_ER_pipeline <- function() {
                          "random" = c("nem.greedy"),
                          "decompose" = c("search"),
                          "progressive" = c("nem.greedy"),
+                         "nullmodel" = c("nem.greedy"),
                          "sc" = c("lem")
                          )
 
-    nem_method <- "triples"
+    nem_method <- "nem.greedy"
 
     # successful screens
     samples <- c("EP300 12BR3 A", "EP300 12BR3 B", "EP300 12BR3 C", "ESRRA 2C A", "ESRRA 2C B", "ESRRA 2C C", "NCOA3 1DR3 A", "NCOA3 1DR3 B", "NCOA3 1DR3 C", "NCOA3 2BR A", "NCOA3 2BR B", "NCOA3 2BR C", "NR2F2 17AR3 A", "NR2F2 17AR3 B", "NR2F2 17AR3 C", "NRIP1 5C A", "NRIP1 5C B", "NRIP1 6A C", "RARA 7B A", "RARA 8C A", "RARA 8C C", "SUMO1 M1 A", "SUMO1 M1 B",     "SUMO1 M1 C",    "SUMO1 M35 A",    "SUMO1 M35 B",    "SUMO1 M35 C", "SUMO3 24AR3 A", "SUMO3 24AR3 B", "SUMO3 24AR3 C", "SUMO3 M16 A", "SUMO3 M16 C", "TRIM33 13CR3 A", "TRIM33 13CR3 B", "TRIM33 13CR3 C",     "TRIM33 M2 B", "TRIM33 M2 C", "ZMIZ1 19AR3 A", "ZMIZ1 19AR3 B", "ZMIZ1 19AR3 C", "ZMIZ1 22m35b A", "ZMIZ1 22m35b B", "ZMIZ1 22m35b C")
@@ -115,7 +118,7 @@ run_ER_pipeline <- function() {
 
 
     # threshold for determining whether lfc is significant and there is an effect or not
-    adjusted_pvalue_cutoff <- 0.05
+    adjusted_pvalue_cutoff <- 0.0005
 
     
     report_attached_egenes <- FALSE
@@ -137,9 +140,23 @@ run_ER_pipeline <- function() {
     #step_030_diffexp(project, aligner, diffexp_method, lfc_dir, diffexp_dir, ER_experiment_definitions, expr.cutoff, samples, selected.genes)
 
     # prepare data in correct format to use with NEMs
-    #step_040_prepare_data(project, aligner, diffexp_method, prep_method, diffexp_dir, prepared_dir, adjusted_pvalue_cutoff, ER_regulon)
+    step_040_prepare_data(project, aligner, diffexp_method, prep_method, diffexp_dir, prepared_dir, adjusted_pvalue_cutoff, ER_regulon)
 
     # nems
     step_050_nems(project, aligner, diffexp_method, prep_method, nem_method, nem_method_compat, prepared_dir, nems_dir, egenes_dir, benchmark_file, report_attached_egenes, selected.genes)
+
+    step_080_egenes(project, aligner, diffexp_method, prep_method, nem_method, nems_dir, egenes_dir, selected.genes)
+
+    step_090_chip(project, aligner, diffexp_method, prep_method, egenes_dir, peaks_dir, chip_dir, sgenes)
+
+
+
+    # run these steps with nullmodel data
+    step_040_prepare_data(project, aligner, diffexp_method, prep_method, diffexp_dir, prepared_dir, adjusted_pvalue_cutoff, ER_regulon)
+    #step_050_nems(project, aligner, diffexp_method, prep_method, nem_method, nem_method_compat, prepared_dir, nems_dir, egenes_dir, benchmark_file, report_attached_egenes, selected.genes)
+    #step_070_plot(prep_method, project, nems_dir, plots_dir, draw_nets_max_nodes, draw_nets_max_count)
+    #step_080_egenes(project, aligner, diffexp_method, prep_method, nem_method, nems_dir, egenes_dir, selected.genes)
+    #step_090_chip(project, aligner, diffexp_method, prep_method, egenes_dir, peaks_dir, chip_dir, sgenes)
+
 }
 
