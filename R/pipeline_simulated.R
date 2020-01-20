@@ -2,6 +2,10 @@
 # execute the analysis pipeline for the simulated data
 # each step will write intermediate output files to disk
 
+base_output_dir <- "~/NEMpipelineoutput/"
+alpha <- 0.05
+beta <- 0.05
+
 run_simulated_pipeline <- function(alpha, beta, base_output_dir) {
 
     ################################################################################
@@ -87,6 +91,7 @@ run_simulated_pipeline <- function(alpha, beta, base_output_dir) {
     draw_nets_max_nodes <- 20  # don't draw if networks are bigger than this
     draw_nets_max_count <- 10   # don't draw if there are more networks than this
 
+    replicates <- 5 # when generating data, generate this number of replicates of perturbation experiments
 
     ################################################################################
     #
@@ -99,8 +104,10 @@ run_simulated_pipeline <- function(alpha, beta, base_output_dir) {
     
     perturbed_genes <- letters[1:7]
 
-    step_042_simulate_data(project, alpha, beta, perturbed_genes, prepared_dir, lfc=TRUE)
+    step_042_simulate_data(project, alpha, beta, perturbed_genes, replicates, prepared_dir, lfc=TRUE)
 
+    aligner <- ""
+    diffexp_method <- ""
 
     # nems
     nem_method <- "triples"
@@ -116,7 +123,12 @@ run_simulated_pipeline <- function(alpha, beta, base_output_dir) {
 
     step_052_correlation(project, perturbed_genes, prepared_dir, nems_dir)
 
-    prep_method <- paste("lfc", paste(alpha, beta, sep="_"), sep=".")
+    step_053_lm(project, perturbed_genes, replicates, prepared_dir, nems_dir)
+
+    step_054_proportionality(project, perturbed_genes, prepared_dir, nems_dir)
+
+    #prep_method <- paste("lfc", paste(alpha, beta, sep="_"), sep=".")
+    # todo fix filters
     step_070_plot(prep_method, project, nems_dir, plots_dir, draw_nets_max_nodes, draw_nets_max_count)
 
 }
