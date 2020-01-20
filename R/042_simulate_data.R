@@ -1,5 +1,5 @@
 
-step_042_simulate_data <- function(project, alpha, beta, perturbed_genes, prepared_dir, lfc=FALSE, plots=FALSE) {
+step_042_simulate_data <- function(project, alpha, beta, perturbed_genes, replicates, prepared_dir, lfc=FALSE, plots=FALSE) {
     m <- matrix( c( 0, 1, 1, 0, 0, 0, 0,
                     0, 0, 0, 1, 1, 0, 0,
                     0, 0, 0, 0, 0, 1, 0,
@@ -11,6 +11,8 @@ step_042_simulate_data <- function(project, alpha, beta, perturbed_genes, prepar
     colnames(m) <- perturbed_genes
 
     generated_data <- make_data(m)
+    generated_data <- generated_data[, rep(colnames(generated_data), replicates)]
+
     if (plots) {
         heatmap(as.matrix(generated_data), scale="none", Rowv=NA, Colv=NA)
     }
