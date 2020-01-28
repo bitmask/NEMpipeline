@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-library(NEMpipeline)
+#library(NEMpipeline)
 
 
 # execute the analysis pipeline for the ER data
@@ -156,12 +156,14 @@ run_ER_pipeline <- function() {
     #step_040_prepare_data(project, aligner, diffexp_method, prep_method, diffexp_dir, prepared_dir, adjusted_pvalue_cutoff, ER_regulon)
 
     # nems
-    #for (nem_method in nem_methods) {
-        #step_050_nems(project, aligner, diffexp_method, prep_method, nem_method, nem_method_compat, prepared_dir, nems_dir, egenes_dir, benchmark_file, report_attached_egenes, selected.genes)
-     #}
+    for (nem_method in nem_methods) {
+        step_050_nems(project, aligner, diffexp_method, prep_method, nem_method, nem_method_compat, prepared_dir, nems_dir, egenes_dir, benchmark_file, report_attached_egenes, selected.genes)
+     }
 
 
+    prep_method <- "bootstrap"
     step_070_plot(distance_method, prep_method, project, nems_dir, plots_dir, draw_nets_max_nodes, draw_nets_max_count)
+    step_070_plot("transitive", prep_method, project, nems_dir, plots_dir, draw_nets_max_nodes, draw_nets_max_count)
 
 
     #step_080_egenes(project, aligner, diffexp_method, prep_method, nem_method, nems_dir, egenes_dir, selected.genes)

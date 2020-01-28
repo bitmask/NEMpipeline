@@ -4,7 +4,7 @@ trim_bootstrap <- function(graphs, bootstrap_threshold=bootstrap_threshold) {
     lapply( graphs, 
         function(gr) {
             values <- lapply(gr, function(x) { ifelse(x > bootstrap_threshold, 1, 0) })
-            trimmed <- matrix( values, nrow=nrow(gr), ncol=ncol(gr), byrow=FALSE)
+            trimmed <- matrix( unlist(values), nrow=nrow(gr), ncol=ncol(gr), byrow=FALSE)
             dimnames(trimmed) <- dimnames(gr)
             return(trimmed)
         }
@@ -63,11 +63,22 @@ step_070_plot <- function(distance_method, prep_method, project, nems_dir, plots
         }
         # TODO name this better
         if (requireNamespace("labnetmet")) {
-            output_pdf <- file.path(plots_dir, paste(paste("bootstrapgraphs_", prep_method, "_", bootstrap_threshold*100, sep=""), project, "pdf", sep="."))
             if (distance_method == "transitive") {
+                output_pdf <- file.path(plots_dir, paste(paste("bootstrapgraphs_", prep_method, "_", bootstrap_threshold*100, sep=""), project, "pdf", sep="."))
                 labnetmet::plot_dist(trimmed_graphs, labnetmet::trans_dist, output_pdf, draw_networks=draw_networks)
+                
             } else if (distance_method == "intersection") {
-                labnetmet::plot_dist(trimmed_graphs, labnetmet::intersect_dist_list, output_pdf, draw_networks=draw_networks)
+                output_pdf <- file.path(plots_dir, paste(paste("intersect_bootstrapgraphs_", prep_method, "_", bootstrap_threshold*100, sep=""), project, "pdf", sep="."))
+                labnetmet::plot_dist_list(trimmed_graphs, labnetmet::intersect_dist_list, output_pdf)
+                # generate null models from the data
+                params <- labnetmet::find_parameters_for_nullmodel(trimmed_graphs)
+                n <- params[[1]]
+                k <- params[[2]]
+                p <- params[[3]]
+                p <- signif(p, digits=2)
+
+                output_pdf <- file.path(plots_dir, paste(paste("nullmodel_n-", n, "k-", k, "p-", p, "_", prep_method, "_", bootstrap_threshold*100, sep=""), project, "pdf", sep="."))
+                labnetmet::calculate_random_dist_list(labnetmet::intersect_dist_list, output_pdf, n, k, p)
             } else {
                 print(paste0("unknown distance method ", distance_method))
             }
